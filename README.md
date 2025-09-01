@@ -3,8 +3,6 @@
 Plataforma que conecta tatuadores e clientes, permitindo o agendamento de sessões a partir de postagens reais de tatuagens.  
 Usuários podem navegar por estilos, favoritar artes e marcar um horário com o tatuador de sua escolha.
 
----
-
 ## Funcionalidades
 
 ### Para Usuários (Clientes)
