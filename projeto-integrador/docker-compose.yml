@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: django-backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=tattoo_db
+      - DB_USER=tattoo_user
+      - DB_PASSWORD=tattoo_pass
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: tattoo_db
+      POSTGRES_USER: tattoo_user
+      POSTGRES_PASSWORD: tattoo_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # já deixa preparado o frontend (futuro)
+  #frontend:
+    #build: ./frontend
+    #container_name: react-frontend
+    #volumes:
+    #  - ./frontend:/app
+    #ports:
+    #  - "3000:3000"
+    #command: ["npm", "start"]
+    #depends_on:
+    #  - backend
+    # por enquanto você pode comentar esse serviço
+
+volumes:
+  postgres_data:
+
