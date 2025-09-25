@@ -31,18 +31,18 @@ services:
     ports:
       - "5432:5432"
 
-  # já deixa preparado o frontend (futuro)
-  #frontend:
-    #build: ./frontend
-    #container_name: react-frontend
-    #volumes:
-    #  - ./frontend:/app
-    #ports:
-    #  - "3000:3000"
-    #command: ["npm", "start"]
-    #depends_on:
-    #  - backend
-    # por enquanto você pode comentar esse serviço
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: angular-frontend
+    volumes:
+      - ./frontend/tattoo-frontend:/app
+      - /app/node_modules  # evita conflito de node_modules com host
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
