@@ -128,3 +128,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Custom user model
+AUTH_USER_MODEL = "tattoo_artists.TattooArtist"
+
+INSTALLED_APPS += [
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "tattoo_artists",
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
