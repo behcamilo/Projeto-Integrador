@@ -4,7 +4,9 @@ services:
   backend:
     build: ./backend
     container_name: django-backend
-    command: python manage.py runserver 0.0.0.0:8000
+    # COMANDO CORRIGIDO: Usa sh -c para executar as migrações (migrate)
+    # e só depois iniciar o servidor (runserver).
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
     ports:
@@ -46,4 +48,3 @@ services:
 
 volumes:
   postgres_data:
-
