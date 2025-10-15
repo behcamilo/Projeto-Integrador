@@ -1,0 +1,63 @@
+<div *ngIf="profile && !isLoading" class="profile-page-container">
+    <div class="profile-header-card">
+        
+        <div class="profile-picture-container">
+            <img [src]="getProfileImageUrl(profile.avatar)" alt="Avatar do Cliente" class="profile-picture">
+        </div>
+        
+        <div class="header-info">
+            <h2>{{ profile.nome }}</h2>
+            <p class="email">Email: {{ profile.email }}</p>
+            <p class="phone">Telefone: {{ profile.telefone || 'Não informado' }}</p>
+            
+            <button 
+                class="upload-button-action" 
+                disabled
+            >
+                Atualizar Meus Dados
+            </button>
+        </div>
+
+        <button 
+            class="logout-button" 
+            (click)="logout()"
+        >
+            Sair da Conta
+        </button>
+    </div>
+    
+    <h3 class="section-title">Minhas Tatuagens Curtidas (Favoritas)</h3>
+
+    <div class="posts-grid">
+        <div *ngIf="profile.posts_curtidos?.length > 0; else noPosts" class="liked-posts-grid">
+            <div *ngFor="let post of profile.posts_curtidos" class="tattoo-post-card">
+                
+                <div class="post-image-placeholder">
+                    <img [src]="post.imagem_url" [alt]="post.descricao" class="post-image">
+                </div>
+
+                <div class="post-details">
+                    <p>Artista: <strong>{{ post.tatuador }}</strong></p>
+                    <p class="post-description">Estilo: {{ post.estilo?.nome || 'N/A' }}</p>
+                </div>
+
+                <div class="card-actions">
+                    <button 
+                        class="submit-button remove-like" 
+                        (click)="handleLike(post.id)"
+                    >
+                        Remover Favorito
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <ng-template #noPosts>
+            <p class="no-posts-message">Você ainda não curtiu nenhuma tatuagem para aparecer aqui. Curta posts no Feed para salvá-los aqui!</p>
+        </ng-template>
+    </div>
+</div>
+
+<div *ngIf="isLoading || !profile" class="loading-state">
+    Carregando informações do perfil...
+</div>

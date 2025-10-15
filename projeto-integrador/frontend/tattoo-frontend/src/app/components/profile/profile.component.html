@@ -1,19 +1,91 @@
-<div *ngIf="user" class="profile-container">
-    <h1>Meu Perfil</h1>
-    <div class="profile-card">
-        <img [src]="getProfileImageUrl(user.profile_picture)" alt="Foto de Perfil" class="profile-picture">
+<div *ngIf="user" class="profile-page-container">
+    <h1>Perfil do Tatuador</h1>
+
+    <div class="profile-header-card">
         
-        <h2>{{ user.username }}</h2>
-        <p><strong>Estúdio:</strong> {{ user.studio_name || 'Não definido' }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p *ngIf="user.bio"><strong>Bio:</strong> {{ user.bio }}</p>
+        <div class="profile-picture-container">
+            <label for="profile-upload">
+                <img [src]="getProfileImageUrl(user.profile_picture)" alt="Foto de Perfil" class="profile-picture">
+                <div class="upload-overlay">
+                    <p>Mudar Foto</p>
+                </div>
+            </label>
+        </div>
+        
+        <input 
+            type="file" 
+            id="profile-upload" 
+            #fileInput 
+            (change)="onFileSelected($event)" 
+            accept="image/*" 
+            style="display: none;"
+            [disabled]="uploading"
+        >
+
+        <div class="header-info">
+            <h2>{{ user.studio_name || user.username }}</h2>
+            <p class="bio">{{ user.bio || 'Bio não informada.' }}</p>
+            <p class="email">Email: {{ user.email }}</p>
+            
+            <button 
+                class="upload-button-action" 
+                (click)="fileInput.click()" 
+                [disabled]="uploading"
+            >
+                {{ uploading ? 'Enviando...' : 'Mudar Foto' }}
+            </button>
+            
+            <div *ngIf="uploadMessage" class="upload-message" [class.error]="uploadMessage.includes('Erro')">
+                {{ uploadMessage }}
+            </div>
+
+        </div>
+
+        <button 
+            class="logout-button" 
+            (click)="authService.logout(); router.navigate(['/login'])"
+        >
+            Sair da Conta
+        </button>
+
     </div>
+
+    <h3 class="section-title">Minhas Tatuagens Postadas</h3>
     
-    <button (click)="authService.logout(); router.navigate(['/login'])" class="logout-button">
-        Sair / Logout
-    </button>
+    <div class="posts-grid">
+        <div class="tattoo-post-card">
+            <div class="post-image-placeholder">Imagem de Tatuagem</div>
+            <div class="post-details">
+                <div class="detail-row"><span>Tamanho</span><span>Preço</span></div>
+                <div class="card-actions">
+                    <button class="like-button">❤️</button>
+                    <button class="agenda-button">Agendar</button>
+                </div>
+            </div>
+        </div>
+        <div class="tattoo-post-card">
+            <div class="post-image-placeholder">Imagem de Tatuagem</div>
+            <div class="post-details">
+                <div class="detail-row"><span>Tamanho</span><span>Preço</span></div>
+                <div class="card-actions">
+                    <button class="like-button">❤️</button>
+                    <button class="agenda-button">Agendar</button>
+                </div>
+            </div>
+        </div>
+        <div class="tattoo-post-card">
+            <div class="post-image-placeholder">Imagem de Tatuagem</div>
+            <div class="post-details">
+                <div class="detail-row"><span>Tamanho</span><span>Preço</span></div>
+                <div class="card-actions">
+                    <button class="like-button">❤️</button>
+                    <button class="agenda-button">Agendar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div *ngIf="!user && authService.isLoggedIn()">
+<div *ngIf="!user" class="loading-state">
     Carregando informações do perfil...
 </div>

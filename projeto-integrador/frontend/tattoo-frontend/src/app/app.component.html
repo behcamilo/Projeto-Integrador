@@ -41,6 +41,23 @@
             color: rgba(240, 240, 240, 0.8);
         }
     }
+
+    /* CORREÇÃO DE ESTILO: Botão Login Cliente (Agora usando a cor do tema) */
+    .client-login-button {
+        font-weight: bold;
+        color: #F0F0F0; 
+        background-color: #D7263D; 
+        padding: 8px 12px;
+        border-radius: 8px; 
+        margin-left: 30px !important; 
+        border: 1px solid #F0F0F0; 
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+
+        &:hover {
+             background-color: #a31c2e; 
+        }
+    }
 </style>
 
 <header class="app-header">
@@ -52,7 +69,9 @@
         <a [routerLink]="['/home']">Home</a>
         <a [routerLink]="['/agenda']">Agenda</a>
         <a [routerLink]="['/feed']">Feed</a>
-        <a [routerLink]="['/perfil']">Perfil</a> 
+        <a [routerLink]="['/perfil']">Perfil (Tatuador)</a>
+
+        <a [routerLink]="['/cliente/login']" class="client-login-button">Login Cliente</a>
     </nav>
 </header>
 

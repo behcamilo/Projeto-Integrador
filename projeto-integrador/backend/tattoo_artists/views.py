@@ -41,9 +41,8 @@ class LoginView(APIView):
             'access': str(refresh.access_token),
         })
 
-class MeView(generics.RetrieveAPIView):
+class MeView(generics.RetrieveUpdateAPIView): # CORREÇÃO: Permite GET e PATCH/PUT
     serializer_class = UserSerializer
-    # Esta view DEVE exigir autenticação
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):

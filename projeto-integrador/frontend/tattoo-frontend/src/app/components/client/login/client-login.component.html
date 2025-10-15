@@ -1,0 +1,25 @@
+<div class="auth-page-container">
+    <div class="auth-card">
+        <div class="welcome-section client-theme">
+            <h2 class="welcome-title">Bem-vindo(a)!</h2>
+            <p class="welcome-message">
+                Acesse sua área para ver seus posts favoritos e agendamentos.
+            </p>
+            <p class="login-prompt">Novo por aqui?</p>
+            <a [routerLink]="['/cliente/cadastro']" class="login-link">Cadastrar-se</a>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-title">Login Cliente</h2>
+            <form [formGroup]="clientLoginForm" (ngSubmit)="onSubmit()">
+                
+                <div class="form-group"><input type="email" formControlName="email" placeholder="E-mail"></div>
+                <div class="form-group"><input type="password" formControlName="password" placeholder="Senha"></div>
+                
+                <div *ngIf="error" class="error-message server-error">{{ error }}</div>
+
+                <button type="submit" [disabled]="clientLoginForm.invalid" class="submit-button">Entrar</button>
+            </form>
+        </div>
+    </div>
+</div>

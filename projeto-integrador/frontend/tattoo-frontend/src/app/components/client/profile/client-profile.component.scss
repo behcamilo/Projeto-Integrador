@@ -1,0 +1,79 @@
+// frontend/tattoo-frontend/src/app/components/client/profile/client-profile.component.scss
+
+@use 'sass:color';
+
+// 1. IMPORTANTE: Mantemos a importação original para garantir que as variáveis (como $text-color-light) sejam carregadas.
+@import '../shared-auth.scss'; 
+
+// 2. IMPORTAR OS ESTILOS DO TATUADOR: Esta linha herda todo o layout e estilo visual do .profile-header-card e .posts-grid.
+@import '../../profile/profile.component.scss'; 
+
+/* --- SOBRESCREVENDO ESTILOS ESPECÍFICOS DO CLIENTE --- */
+
+.posts-grid {
+    // Sobrescreve a largura do grid de posts, se necessário.
+    max-width: 1200px;
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+.main-title {
+    color: #F0F0F0;
+    margin-bottom: 20px;
+}
+
+.no-posts-message {
+    color: #999;
+    padding: 20px;
+    text-align: center;
+}
+
+.post-image-placeholder {
+    // Remove o placeholder preto e garante que a imagem do post curtido seja o conteúdo
+    background: none; 
+    height: auto;
+    display: block; 
+    border-bottom: none;
+}
+
+.post-image {
+    // Garante que as imagens dos posts curtidos sejam exibidas corretamente
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-actions {
+    // Ajusta o estilo para o botão de remoção de favorito
+    .remove-like {
+        background-color: #555555;
+        color: $text-color-light;
+        font-weight: bold;
+        border: none;
+        border-radius: $border-radius-input;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.2s;
+        
+        &:hover {
+            background-color: color.scale(#555555, $lightness: 10%);
+        }
+    }
+
+    // Esconde os botões do feed original (Agenda e Like)
+    .like-button, .agenda-button { 
+        display: none;
+    }
+    
+    // Alinha o botão "Remover Favorito" à esquerda, ocupando o espaço do like+agenda
+    justify-content: flex-start;
+}
+
+.liked-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    width: 100%;
+}

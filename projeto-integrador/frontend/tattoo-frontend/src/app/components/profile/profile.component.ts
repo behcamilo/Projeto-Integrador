@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; 
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-profile',
@@ -14,9 +15,10 @@ export class ProfileComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
   user: any = null; 
+  uploading: boolean = false; 
+  uploadMessage: string | null = null;
   
   ngOnInit(): void {
-    // Redirecionamento de segurança caso o usuário tente acessar sem estar logado
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']); 
       return;
@@ -25,7 +27,6 @@ export class ProfileComponent implements OnInit {
   }
 
   fetchUserProfile() {
-    // Chama o endpoint /api/tattoo/me/
     this.authService.getMe().subscribe({
       next: (data: any) => {
         this.user = data;
@@ -38,13 +39,42 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Lógica para formatar a URL da imagem (incluindo o host do backend)
+  // CORREÇÃO OTIMIZADA: Retorna a URL absoluta diretamente se ela vier completa (o que está acontecendo)
   getProfileImageUrl(path: string | null): string {
-    if (path) {
-      // Usa o proxy/backend em localhost:8000 para acessar a pasta media
-      return `http://localhost:8000${path}`;
+    if (path && path.startsWith('http')) {
+        // Se o path já começar com 'http' (URL absoluta), usa ele.
+        return path; 
     }
-    // Imagem padrão (crie assets/default-profile.png)
+    if (path) {
+        // Fallback: Se for um path relativo (ex: /media/...), constrói o URL.
+        const baseUrl = environment.apiUrl.replace('/api/tattoo', '');
+        return `${baseUrl}${path}`;
+    }
+    // Imagem padrão
     return 'assets/default-profile.png'; 
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+
+    if (file) {
+      this.uploading = true;
+      this.uploadMessage = 'Enviando imagem...';
+
+      this.authService.updateProfilePicture(file).subscribe({
+        next: (response: any) => {
+          this.user = response; 
+          this.uploading = false;
+          this.uploadMessage = 'Foto de perfil atualizada com sucesso!';
+          setTimeout(() => this.uploadMessage = null, 3000);
+        },
+        error: (err: any) => {
+          this.uploading = false;
+          this.uploadMessage = 'Erro ao enviar a imagem. Tente novamente.';
+          console.error('Erro de upload:', err);
+          setTimeout(() => this.uploadMessage = null, 3000);
+        }
+      });
+    }
   }
 }

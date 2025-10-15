@@ -45,14 +45,41 @@ export class AuthService {
     localStorage.clear();
   }
 
-  // CORREÇÃO: Endpoint para buscar dados do usuário logado
   getMe(): Observable<any> {
-    // A chamada é para /api/tattoo/me/. O Interceptor adiciona o token JWT.
     return this.http.get(`${this.apiUrl}/me/`); 
   }
 
   getTattooArtistProfiles(): Observable<any[]> {
-    // A chamada é para /api/tattoo/profiles/
     return this.http.get<any[]>(`${this.apiUrl}/profiles/`); 
+  }
+
+  // --- 1. ENVIAR FOTO DE PERFIL (PATCH) ---
+  updateProfilePicture(imageFile: File): Observable<any> {
+    const formData = new FormData();
+    // O nome do campo deve ser 'profile_picture'
+    formData.append('profile_picture', imageFile, imageFile.name);
+
+    // PATCH para o endpoint /me/ (o token é adicionado pelo Interceptor)
+    return this.http.patch(`${this.apiUrl}/me/`, formData); 
+  }
+
+  // --- 2. POSTAR NOVA TATUAGEM (POST) ---
+  postTattooImage(postData: { descricao: string, tamanho: string, preco: number, estilo_id?: number }, imageFile: File): Observable<any> {
+    const formData = new FormData();
+    
+    // O nome do campo deve ser 'imagem'
+    formData.append('imagem', imageFile, imageFile.name);
+    
+    // Anexar outros dados do formulário
+    formData.append('descricao', postData.descricao);
+    formData.append('tamanho', postData.tamanho);
+    formData.append('preco', postData.preco.toString());
+    
+    if (postData.estilo_id) {
+        formData.append('estilo_id', postData.estilo_id.toString());
+    }
+    
+    // POST para o endpoint de criação de posts (Assumindo que o /api/tatuagem/posts/ está em environment.apiUrl/posts/)
+    return this.http.post(`${this.apiUrl}/posts/`, formData); 
   }
 }

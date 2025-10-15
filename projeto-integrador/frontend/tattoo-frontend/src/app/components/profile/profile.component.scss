@@ -1,39 +1,226 @@
-.profile-container {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #1A1A1A; 
+@use 'sass:color';
+
+$primary-red: #D7263D;
+$dark-background: #1A1A1A;
+$card-background: #2A2A2A;
+$text-color-light: #F0F0F0;
+$border-radius-card: 15px; // Ajustado para ser mais arredondado
+$border-radius-input: 8px;
+$card-border: #333333;
+$heart-color: #FF69B4;
+
+.profile-page-container {
+    background-color: $dark-background;
     min-height: calc(100vh - 60px);
+    padding: 40px 5%;
+    color: $text-color-light;
 }
 
-.profile-card {
-    background-color: #2a2a2a;
-    color: #F0F0F0;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    width: 100%;
-    max-width: 400px;
+h1 {
+    color: $text-color-light; 
+    margin-bottom: 30px;
     text-align: center;
-    margin-top: 20px;
 }
 
-.profile-picture {
-    width: 150px;
-    height: 150px;
+.profile-header-card {
+    background-color: $card-background;
+    border-radius: $border-radius-card;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between; // Espaça os elementos
+    gap: 30px;
+    
+    @media (max-width: 768px) {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+.profile-picture-container {
+    position: relative;
+    cursor: pointer;
     border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 15px;
-    border: 3px solid #D7263D;
+    width: 120px;
+    height: 120px;
+    min-width: 120px; /* Evita que encolha */
+    
+    .profile-picture {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid $primary-red;
+        transition: opacity 0.3s;
+    }
+
+    .upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: $text-color-light;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    &:hover .upload-overlay {
+        opacity: 1;
+    }
+}
+
+.header-info {
+    flex-grow: 1;
+    
+    @media (max-width: 768px) {
+        margin-top: 20px;
+    }
+}
+
+.header-info h2 {
+    margin-top: 0;
+    font-size: 1.8em;
+    color: $text-color-light;
+}
+
+.bio {
+    font-style: italic;
+    color: rgba($text-color-light, 0.8);
+}
+
+.email {
+    color: rgba($text-color-light, 0.8);
+    font-size: 0.9em;
+}
+
+.section-title {
+    color: $primary-red; 
+    border-bottom: 2px solid $primary-red;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+/* 🎯 ESTILO UNIFICADO PARA OS BOTÕES (MUDAR FOTO e SAIR) */
+
+.upload-button-action,
+.logout-button {
+    background-color: $primary-red;
+    color: $text-color-light;
+    border: none;
+    border-radius: $border-radius-input;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding: 10px 20px;
+    
+    &:hover:not(:disabled) {
+        background-color: color.scale($primary-red, $lightness: -10%);
+    }
+
+    &:disabled {
+        background-color: rgba($primary-red, 0.5);
+    }
+}
+
+.upload-button-action {
+    margin-top: 15px;
+    display: inline-block; 
+    width: 200px;
 }
 
 .logout-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #D7263D;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    // Alinhamento à direita no header-card (em telas grandes)
+    align-self: flex-start;
+    
+    @media (max-width: 768px) {
+        align-self: stretch; /* Ocupa a largura total em telas menores */
+        margin-top: 20px;
+    }
+}
+
+/* --- ESTILOS DO FEED/CARDS (Placeholder) --- */
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.tattoo-post-card {
+    background-color: $dark-background;
+    border: 1px solid $card-border;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+
+    .post-image-placeholder {
+        height: 200px;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: rgba($text-color-light, 0.5);
+        border-bottom: 1px solid $card-border;
+    }
+
+    .post-details {
+        padding: 15px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: $text-color-light;
+    }
+    
+    .card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+
+        .like-button {
+            background: $dark-background;
+            border: 2px solid $primary-red;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            .heart-icon { font-size: 1.2em; color: $heart-color; }
+            &:hover { background-color: rgba($primary-red, 0.2); }
+        }
+
+        .agenda-button {
+            background-color: $primary-red; 
+            color: $text-color-light;
+            font-weight: bold;
+            border: none;
+            border-radius: $border-radius-input;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            &:hover {
+                background-color: color.scale($primary-red, $lightness: -10%); 
+            }
+        }
+    }
 }
