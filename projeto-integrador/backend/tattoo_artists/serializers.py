@@ -28,4 +28,5 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TattooArtist
-        fields = ('id', 'username', 'email', 'studio_name', 'bio')
+        # CORREÇÃO: Adiciona 'profile_picture'
+        fields = ('id', 'username', 'email', 'studio_name', 'bio', 'profile_picture')

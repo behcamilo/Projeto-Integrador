@@ -15,15 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static # <-- Importação necessária
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
 
-from django.urls import path, include
-
 urlpatterns += [
     path("api/tattoo/", include("tattoo_artists.urls")),
+    # CORREÇÃO: Adicionado o include do app tatuagem
+    path("api/tatuagem/", include("tatuagem.urls")), 
 ]
+
+# NOVO: Apenas em modo DEBUG, servimos os arquivos de mídia
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,47 @@
+<div class="main-content-container">
+    <div class="page-title">
+        <h2>Encontre Seu Próximo Tatuador</h2>
+    </div>
+
+    <div class="profiles-grid">
+        <div class="tattoo-card" *ngFor="let profile of tattooArtistProfiles">
+            
+            <div class="card-header">
+                <img src="assets/default-avatar.png" alt="Avatar" class="profile-avatar"> 
+                <h3>{{ profile.username || profile.nome_tatuador }}</h3>
+            </div>
+
+            <div class="card-image-placeholder">
+                </div>
+
+            <div class="card-details">
+                <div class="detail-row">
+                    <span>Tamanho</span>
+                    <span>Preço</span>
+                </div>
+                <div class="detail-info">
+                    <span>{{ profile.bio || 'Estilos: Não listado' }}</span>
+                    <span>R$ XXX</span>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <button class="like-button">
+                    <span class="heart-icon">❤️</span>
+                </button>
+                <button class="agenda-button" (click)="agendar(profile.id)">
+                    Agendar
+                </button>
+            </div>
+        </div>
+
+        <ng-template #notLoggedIn>
+            <div class="welcome-box">
+                <h2>Bem-vindo ao Tattoo App!</h2>
+                <p>O feed de tatuadores estará aqui. Por enquanto, explore:</p>
+                <a [routerLink]="['/login']">Faça Login</a> | 
+                <a [routerLink]="['/register']">Crie sua Conta</a>
+            </div>
+        </ng-template>
+    </div>
+</div>

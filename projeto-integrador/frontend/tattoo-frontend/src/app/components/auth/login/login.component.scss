@@ -1,0 +1,184 @@
+// tattoo-frontend/src/app/components/auth/login/login.component.scss
+
+@use 'sass:color';
+
+/* Variáveis para reutilização (Mantenha este bloco completo) */
+$primary-red: #D7263D;
+$dark-background: #1A1A1A;
+$card-background: #2A2A2A;
+$text-color-light: #F0F0F0;
+$input-background: #4A4A4A;
+$input-text-color: #E0E0E0;
+$border-radius-card: 20px;
+$border-radius-input: 8px;
+
+.login-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 60px); // Ajuste para altura da navegação
+    background-color: $dark-background;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-card { // Renomeado de .register-card
+    display: flex;
+    background-color: $card-background;
+    border-radius: $border-radius-card;
+    overflow: hidden;
+    width: 90%;
+    max-width: 1000px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: $text-color-light;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        width: 100%;
+        max-width: 500px;
+    }
+}
+
+.welcome-section {
+    flex: 1;
+    background-color: $primary-red;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .welcome-title {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        color: $text-color-light;
+        font-weight: bold;
+    }
+
+    .welcome-message {
+        font-size: 1.1em;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        max-width: 350px;
+    }
+
+    .login-prompt {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+
+    .login-link {
+        color: $text-color-light;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 8px 20px;
+        border: 2px solid $text-color-light;
+        border-radius: $border-radius-input;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: rgba($text-color-light, 0.1);
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 30px;
+        .welcome-title {
+            font-size: 2em;
+        }
+    }
+}
+
+.form-section {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .form-title {
+        font-size: 2em;
+        margin-bottom: 30px;
+        color: $text-color-light;
+        text-align: center;
+    }
+
+    form {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+
+        .form-group {
+            margin-bottom: 20px;
+
+            input,
+            textarea {
+                width: 100%;
+                padding: 15px 20px;
+                border: none;
+                border-radius: $border-radius-input;
+                background-color: $input-background;
+                color: $input-text-color;
+                font-size: 1em;
+                box-sizing: border-box;
+
+                &::placeholder {
+                    color: rgba($input-text-color, 0.7);
+                }
+
+                &:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 2px $primary-red;
+                }
+            }
+
+            textarea {
+                resize: vertical;
+                min-height: 80px;
+            }
+        }
+
+        .error-message {
+            color: $primary-red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            text-align: left;
+        }
+
+        .server-error {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background-color: $primary-red;
+            color: $text-color-light;
+            border: none;
+            border-radius: $border-radius-input;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            &:hover:not(:disabled) {
+                // Usa a função Sass corrigida
+                background-color: color.scale($primary-red, $lightness: -10%);
+            }
+
+            &:disabled {
+                background-color: rgba($primary-red, 0.5);
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 30px;
+        .form-title {
+            font-size: 1.8em;
+        }
+    }
+}

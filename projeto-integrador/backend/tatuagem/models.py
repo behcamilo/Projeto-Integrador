@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings # Importar settings para referenciar o Custom User Model
 
 # Tabela para armazenar os estilos de tatuagem
 class Estilo(models.Model):
@@ -20,33 +21,20 @@ class Cliente(models.Model):
         return self.nome
 
 
-# Tatuador
-class Tatuador(models.Model):
-    nome_tatuador = models.CharField(max_length=150)
-    nome_estudio = models.CharField(max_length=150, null=True, blank=True)
-    localizacao = models.CharField(max_length=150, null=True, blank=True)
-    estilos = models.ManyToManyField(Estilo, blank=True)  # múltiplos estilos
-    experiencia = models.PositiveIntegerField(null=True, blank=True)
-    bio = models.TextField(null=True, blank=True)
-    avatar = models.ImageField(upload_to='avatars/tatuadores/', null=True, blank=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        if self.nome_estudio:
-            return f"{self.nome_tatuador} ({self.nome_estudio})"
-        return self.nome_tatuador
-
+# O MODELO TATUADOR FOI REMOVIDO PARA ELIMINAR O CONFLITO.
+# O modelo de usuário principal é 'tattoo_artists.TattooArtist'.
 
 # Agenda do tatuador
 class Agenda(models.Model):
     STATUS_CHOICES = [
         ('disponivel', 'Disponível'),
-        ('pendente', 'Pendente'),        # cliente solicitou, aguardando confirmação
-        ('reservado', 'Reservado'),      # confirmado
-        ('indisponivel', 'Indisponível'), # tatuador bloqueou o horário
+        ('pendente', 'Pendente'),        
+        ('reservado', 'Reservado'),      
+        ('indisponivel', 'Indisponível'),
     ]
 
-    tatuador = models.ForeignKey(Tatuador, on_delete=models.CASCADE, related_name="agendas")
+    # CORREÇÃO: Referenciar o Custom User Model TattooArtist via settings
+    tatuador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="agendas")
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name="agendamentos")
     data = models.DateField()
     hora_inicio = models.TimeField()
@@ -62,3 +50,30 @@ class Agenda(models.Model):
 
     def __str__(self):
         return f"{self.data} {self.hora_inicio} - {self.tatuador} ({self.get_status_display()})"
+
+
+# NOVO: Modelo para Postagens de Tatuagem (Feed)
+class TatuagemPost(models.Model):
+    # O tatuador que fez a postagem (ligado ao modelo de usuário TattooArtist)
+    tatuador = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='posts'
+    )
+    
+    # Campo para a imagem da tatuagem
+    imagem = models.ImageField(
+        upload_to='tattoos/', 
+        help_text='Imagem principal da tatuagem.'
+    )
+    
+    descricao = models.TextField(blank=True, null=True)
+    estilo = models.ForeignKey(Estilo, on_delete=models.SET_NULL, null=True, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    
+    # Campos para o layout do feed (Tamanho e Preço)
+    tamanho = models.CharField(max_length=50, blank=True, null=True)
+    preco = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"Post de {self.tatuador.username} - {self.data_criacao}"

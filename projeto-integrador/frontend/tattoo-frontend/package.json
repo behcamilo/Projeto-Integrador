@@ -2,7 +2,7 @@
   "name": "tattoo-frontend",
   "version": "0.0.0",
 "scripts": {
-  "start": "ng serve --host 0.0.0.0 --poll 2000",
+  "start": "ng serve --host 0.0.0.0 --poll 2000 --proxy-config proxy.conf.json",
   "build": "ng build"
 },
   "private": true,

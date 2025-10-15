@@ -1,0 +1,149 @@
+// tattoo-frontend/src/app/components/auth/home/home.component.scss
+
+@use 'sass:color';
+
+/* Variáveis COPIADAS do RegisterComponent (CORRIGIDO) */
+$primary-red: #D7263D;
+$dark-background: #1A1A1A;
+$card-background: #1A1A1A;
+$card-border: #333333;
+$text-color-light: #F0F0F0;
+$input-background: #4A4A4A;
+$input-text-color: #E0E0E0;
+$border-radius-card: 20px;
+$border-radius-input: 8px; // <-- VARIÁVEL ADICIONADA
+$heart-color: #FF69B4; 
+
+.main-content-container {
+    background-color: $dark-background;
+    min-height: calc(100vh - 60px);
+    padding: 30px 5%;
+}
+
+.page-title {
+    color: $text-color-light;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.profiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    justify-content: center;
+}
+
+.tattoo-card {
+    background-color: $card-background;
+    border: 1px solid $card-border;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #242424;
+    border-bottom: 1px solid $card-border;
+
+    .profile-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 2px solid $primary-red;
+    }
+
+    h3 {
+        margin: 0;
+        font-size: 1.2em;
+        color: $text-color-light;
+    }
+}
+
+.card-image-placeholder {
+    height: 250px;
+    background: #000;
+    background-image: 
+        repeating-linear-gradient(90deg, transparent, transparent 49%, rgba(255, 255, 255, 0.05) 50%),
+        repeating-linear-gradient(180deg, transparent, transparent 95%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.card-details {
+    padding: 15px;
+    border-bottom: 1px solid $card-border;
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: $text-color-light;
+    }
+    
+    .detail-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9em;
+        color: rgba($text-color-light, 0.7);
+    }
+}
+
+
+.card-actions {
+    display: flex;
+    padding: 15px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+
+    .like-button {
+        background: $dark-background;
+        border: 2px solid $primary-red;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        
+        .heart-icon {
+            font-size: 1.2em;
+            color: $heart-color; 
+        }
+
+        &:hover {
+            background-color: rgba($primary-red, 0.2);
+        }
+    }
+
+    .agenda-button {
+        background-color: $primary-red; 
+        color: $text-color-light;
+        font-weight: bold;
+        border: none;
+        // Usa a variável corrigida
+        border-radius: $border-radius-input; 
+        padding: 12px 25px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.2s;
+
+        &:hover {
+            // Usa a função Sass corrigida
+            background-color: color.scale($primary-red, $lightness: -10%); 
+        }
+    }
+}

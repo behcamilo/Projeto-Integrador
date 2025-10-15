@@ -1,0 +1,46 @@
+<div class="register-page-container">
+    <div class="register-card">
+        
+        <div class="welcome-section">
+            <h2 class="welcome-title">Bem vindo, tatuador!</h2>
+            <p class="welcome-message">
+                Estamos muito felizes por ter você aqui.
+                Aproveite tudo o que preparamos para você!
+            </p>
+            <p class="login-prompt">Já possui uma conta?</p>
+            <a [routerLink]="['/login']" class="login-link">Entrar</a>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-title">Cadastro</h2>
+
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                    <input id="username" type="text" formControlName="username" placeholder="Nome">
+                </div>
+                
+                <div class="form-group">
+                    <input id="studio_name" type="text" formControlName="studio_name" placeholder="Nome do studio">
+                </div>
+
+                <div class="form-group">
+                    <input id="email" type="email" formControlName="email" placeholder="E-mail">
+                </div>
+
+                <div class="form-group">
+                    <input id="password" type="password" formControlName="password" placeholder="Senha">
+                </div>
+
+                <div class="form-group">
+                    <textarea id="bio" formControlName="bio" placeholder="Bio (Fale sobre sua arte)"></textarea> 
+                </div>
+
+                <div *ngIf="error" class="error-message server-error">
+                    {{ error }}
+                </div>
+
+                <button type="submit" [disabled]="registerForm.invalid" class="submit-button">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+</div>

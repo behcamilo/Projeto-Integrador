@@ -1,0 +1,19 @@
+<div *ngIf="user" class="profile-container">
+    <h1>Meu Perfil</h1>
+    <div class="profile-card">
+        <img [src]="getProfileImageUrl(user.profile_picture)" alt="Foto de Perfil" class="profile-picture">
+        
+        <h2>{{ user.username }}</h2>
+        <p><strong>Estúdio:</strong> {{ user.studio_name || 'Não definido' }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p *ngIf="user.bio"><strong>Bio:</strong> {{ user.bio }}</p>
+    </div>
+    
+    <button (click)="authService.logout(); router.navigate(['/login'])" class="logout-button">
+        Sair / Logout
+    </button>
+</div>
+
+<div *ngIf="!user && authService.isLoggedIn()">
+    Carregando informações do perfil...
+</div>
