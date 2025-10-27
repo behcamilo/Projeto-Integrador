@@ -1,26 +1,27 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; 
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment.development';
+import { AgendaComponent } from "../agenda/agenda.component";
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AgendaComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
-  user: any = null; 
-  uploading: boolean = false; 
+  user: any = null;
+  uploading: boolean = false;
   uploadMessage: string | null = null;
-  
+
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']); 
+      this.router.navigate(['/login']);
       return;
     }
     this.fetchUserProfile();
@@ -43,7 +44,7 @@ export class ProfileComponent implements OnInit {
   getProfileImageUrl(path: string | null): string {
     if (path && path.startsWith('http')) {
         // Se o path já começar com 'http' (URL absoluta), usa ele.
-        return path; 
+        return path;
     }
     if (path) {
         // Fallback: Se for um path relativo (ex: /media/...), constrói o URL.
@@ -51,7 +52,7 @@ export class ProfileComponent implements OnInit {
         return `${baseUrl}${path}`;
     }
     // Imagem padrão
-    return 'assets/default-profile.png'; 
+    return 'assets/default-profile.png';
   }
 
   onFileSelected(event: any): void {
@@ -63,7 +64,7 @@ export class ProfileComponent implements OnInit {
 
       this.authService.updateProfilePicture(file).subscribe({
         next: (response: any) => {
-          this.user = response; 
+          this.user = response;
           this.uploading = false;
           this.uploadMessage = 'Foto de perfil atualizada com sucesso!';
           setTimeout(() => this.uploadMessage = null, 3000);

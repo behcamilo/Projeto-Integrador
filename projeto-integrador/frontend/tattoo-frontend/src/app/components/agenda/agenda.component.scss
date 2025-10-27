@@ -1,0 +1,322 @@
+// agenda.component.scss
+
+.booking-container {
+    display: flex;
+    max-width: 100%;
+    width: 100%;
+    margin: 40px auto;
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    min-height: 450px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.calendar-panel {
+    flex: 1.5;
+    padding: 20px;
+    border-right: 1px solid #333;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.current-month {
+    color: #ff5722;
+    margin: 0;
+    font-size: 1.4em;
+}
+
+.nav-button {
+    background: none;
+    border: 1px solid #555;
+    color: #ff5722;
+    font-size: 1.2em;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+    background-color: #333;
+}
+
+.day-names {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    text-align: center;
+}
+
+.day-cell {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #2a2a2a;
+    color: #f0f0f0;
+    border: 1px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.day-cell:hover:not(.selected):not(.empty) {
+    background-color: #444;
+}
+
+.day-cell.empty {
+    background-color: transparent;
+    border: none;
+    cursor: default;
+}
+
+.day-cell.selected {
+    background-color: #ff5722;
+    color: white;
+    font-weight: bold;
+}
+
+.day-cell.has-appointments:not(.selected) {
+    border-color: #ffeb3b;
+    font-weight: bold;
+}
+
+.hours-panel {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.hours-header {
+    color: #ff5722;
+    margin-top: 0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.hours-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: auto;
+}
+
+.hour-slot {
+    flex-basis: calc(25% - 7.5px);
+    padding: 14px 10px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer; // [MODIFICADO] Garante que todos sejam clicáveis
+    transition: background-color 0.2s, opacity 0.2s;
+    text-align: center;
+    // [NOVO] para suportar a hora e o nome do usuário
+    display: flex;
+    flex-direction: column;
+}
+
+.hour-slot.disponivel {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.hour-slot.reservado {
+    background-color: #FFC107; // Amarelo
+    color: #1e1e1e;
+    cursor: pointer; // [MODIFICADO] Permite clique
+    opacity: 1; // [MODIFICADO] Remove opacidade
+}
+
+.hour-slot.ocupado {
+    background-color: #F44336; // Vermelho
+    color: white;
+    cursor: pointer; // [MODIFICADO] Permite clique
+    opacity: 1; // [MODIFICADO] Remove opacidade
+}
+
+.hour-slot:hover { // [MODIFICADO] Remove :not([disabled])
+    filter: brightness(1.1);
+}
+
+.booked-user { // [NOVO] Estilo para o nome do usuário
+    font-size: 0.7em;
+    font-weight: normal;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+
+.no-hours-message {
+    color: #999;
+    font-style: italic;
+}
+
+.schedule-legend {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9em;
+    color: #ccc;
+    border-top: 1px solid #333;
+    padding-top: 15px;
+}
+
+.schedule-legend span {
+    margin: 0 10px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.legend-dot.disponivel { background-color: #4CAF50; }
+.legend-dot.reservado { background-color: #FFC107; }
+.legend-dot.ocupado { background-color: #F44336; }
+
+
+/* [NOVO] Estilos para o Modal de Agendamento */
+.booking-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.booking-modal {
+    background-color: #1e1e1e;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
+    width: 90%;
+    max-width: 450px;
+    color: #f0f0f0;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+
+    h4 {
+        margin: 0;
+        color: #ff5722;
+    }
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+        color: #fff;
+    }
+}
+
+.form-group {
+    margin-bottom: 15px;
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #bbb;
+    }
+
+    input[type="text"], select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #3e3e3e;
+        color: #f0f0f0;
+        box-sizing: border-box;
+    }
+}
+
+.error-message {
+    color: #F44336;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.confirm-button, .cancel-button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+.confirm-button {
+    background-color: #ff5722;
+    color: white;
+
+    &:hover:not([disabled]) {
+        opacity: 0.9;
+    }
+
+    &[disabled] {
+        background-color: #777;
+        cursor: not-allowed;
+    }
+}
+
+.cancel-button {
+    background-color: #555;
+    color: white;
+
+    &:hover {
+        background-color: #777;
+    }
+}

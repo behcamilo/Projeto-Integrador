@@ -1,0 +1,120 @@
+<div class="booking-container">
+    <div class="calendar-panel">
+
+        <header class="calendar-header">
+            <button (click)="changeMonth(-1)" class="nav-button">&#10094;</button>
+            <h4 class="current-month">{{ currentMonthYear | titlecase }}</h4>
+            <button (click)="changeMonth(1)" class="nav-button">&#10095;</button>
+        </header>
+
+        <div class="day-names">
+            <span>Dom</span>
+            <span>Seg</span>
+            <span>Ter</span>
+            <span>Qua</span>
+            <span>Qui</span>
+            <span>Sex</span>
+            <span>Sab</span>
+        </div>
+
+        <div class="days-grid">
+            <ng-container *ngFor="let day of daysOfMonth">
+
+                <button
+                    *ngIf="day; else emptyCell"
+                    class="day-cell"
+                    [class.selected]="isDaySelected(day)"
+                    [class.has-appointments]="hasAppointments(day)"
+                    (click)="selectDay(day)"
+                >
+                    {{ day.getDate() }}
+                </button>
+
+                <ng-template #emptyCell>
+                    <span class="day-cell empty"></span>
+                </ng-template>
+            </ng-container>
+        </div>
+
+    </div>
+
+    <div class="hours-panel">
+        <h4 *ngIf="selectedDate && selectedDate.getFullYear() !== 1970" class="hours-header">
+            Horários para {{ selectedDate | date:'fullDate' }}
+        </h4>
+        <h4 *ngIf="!selectedDate || selectedDate.getFullYear() === 1970" class="hours-header">
+            Selecione uma data no calendário
+        </h4>
+
+        <div class="hours-list">
+            <ng-container *ngIf="horariosDisponiveis.length > 0; else noHours">
+                <button
+                    *ngFor="let horario of horariosDisponiveis"
+                    class="hour-slot"
+                    [ngClass]="horario.status"
+                    (click)="agendarHorario(horario)"
+                >
+                    {{ horario.time }}
+                </button>
+            </ng-container>
+
+            <ng-template #noHours>
+                <p class="no-hours-message">Nenhum horário registrado para esta data ou a agenda está fechada.</p>
+            </ng-template>
+        </div>
+
+        <div class="schedule-legend">
+            <span><i class="legend-dot disponivel"></i> Disponível</span>
+            <span><i class="legend-dot reservado"></i> Reserva Prévia</span>
+            <span><i class="legend-dot ocupado"></i> Ocupado</span>
+        </div>
+    </div>
+</div>
+
+
+<div class="booking-modal-overlay" *ngIf="showBookingForm">
+    <div class="booking-modal">
+        <header class="modal-header">
+            <h4>Agendar Horário: {{ selectedHorario?.time }}</h4>
+            <button class="close-button" (click)="closeBookingForm()">×</button>
+        </header>
+
+        <form [formGroup]="bookingForm" (ngSubmit)="onSubmitBooking()">
+            <div class="form-group">
+                <label for="userName">Nome do Usuário:</label>
+                <input
+                    id="userName"
+                    type="text"
+                    formControlName="userName"
+                    placeholder="Digite o nome do usuário"
+                    required
+                >
+                <div *ngIf="bookingForm.get('userName')?.invalid && bookingForm.get('userName')?.touched" class="error-message">
+                    O nome do usuário é obrigatório.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reservationType">Mudar Status para:</label>
+                <select id="reservationType" formControlName="reservationType" required>
+                    <option value="disponivel">Disponivel</option>
+                    <option value="reservado">Reserva Prévia</option>
+                    <option value="ocupado">Ocupado</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button
+                    type="submit"
+                    [disabled]="bookingForm.invalid"
+                    class="confirm-button"
+                >
+                    Confirmar Agendamento
+                </button>
+                <button type="button" (click)="closeBookingForm()" class="cancel-button">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
