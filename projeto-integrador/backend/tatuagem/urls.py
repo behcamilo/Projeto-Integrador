@@ -4,10 +4,14 @@ from .views import (
     ClientRegisterView, 
     ClientLoginView, 
     ClientProfileView,
+    EstiloRegisterView,
     LikePostView
 )
 
 urlpatterns = [
+    # Rotas de Estilo
+    path("estilos/", EstiloRegisterView.as_view(), name="estilo-register"),
+
     # Rotas de Posts (Tatuadores)
     path("posts/", TatuagemPostListCreateView.as_view(), name="post-list-create"),
 

@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
 
-from .models import TatuagemPost, Cliente
-from .serializers import TatuagemPostSerializer, ClientRegisterSerializer, ClientLoginSerializer, ClientProfileSerializer
+from .models import TatuagemPost, Cliente, Estilo
+from .serializers import TatuagemPostSerializer, ClientRegisterSerializer, ClientLoginSerializer, ClientProfileSerializer, EstiloSerializer
 
 # --- VIEWS DE AUTENTICAÇÃO DO CLIENTE ---
 
@@ -61,6 +61,19 @@ class TatuagemPostListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(tatuador=self.request.user)
+
+class EstiloRegisterView(generics.ListCreateAPIView):
+    serializer_class = EstiloSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = Estilo.objects.all()
+        nome = self.request.query_params.get('nome')
+
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+
+        return queryset
 
 class LikePostView(APIView):
     # NOVO: Esta view é para o Cliente curtir ou descurtir um post
