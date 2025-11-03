@@ -39,45 +39,36 @@
     </div>
 
     <div class="hours-panel">
-        <h4 *ngIf="selectedDate && selectedDate.getFullYear() !== 1970" class="hours-header">
-            Horários para {{ selectedDate | date:'fullDate' }}
-        </h4>
-        <h4 *ngIf="!selectedDate || selectedDate.getFullYear() === 1970" class="hours-header">
-            Selecione uma data no calendário
-        </h4>
-
-        <div class="hours-list">
-            <ng-container *ngIf="horariosDisponiveis.length > 0; else noHours">
-                <button
-                    *ngFor="let horario of horariosDisponiveis"
-                    class="hour-slot"
-                    [ngClass]="horario.status"
-                    (click)="agendarHorario(horario)"
-                >
-                    {{ horario.time }}
-                </button>
-            </ng-container>
-
-            <ng-template #noHours>
-                <p class="no-hours-message">Nenhum horário registrado para esta data ou a agenda está fechada.</p>
-            </ng-template>
+        <div class="hours-grid">
+            <div
+                *ngFor="let horario of horariosDisponiveis"
+                class="time-slot"
+                [class.status-disponivel]="horario.status === 'disponivel'"
+                [class.status-reservado]="horario.status === 'reservado'"
+                [class.status-ocupado]="horario.status === 'ocupado'"
+                (click)="openBookingForm(horario)"
+            >
+                <span class="slot-time">{{ horario.hora_inicio | slice:0:5 }}</span>
+                <span class="slot-status">
+                    {{ horario.status | titlecase }}
+                </span>
+            </div>
         </div>
 
-        <div class="schedule-legend">
-            <span><i class="legend-dot disponivel"></i> Disponível</span>
-            <span><i class="legend-dot reservado"></i> Reserva Prévia</span>
-            <span><i class="legend-dot ocupado"></i> Ocupado</span>
-        </div>
+        <p *ngIf="horariosDisponiveis.length === 0 && selectedDate">
+            Não há horários disponíveis ou definidos para este dia.
+        </p>
     </div>
 </div>
 
+<div *ngIf="showBookingForm" class="booking-modal-overlay">
+    <div class="booking-modal-content">
 
-<div class="booking-modal-overlay" *ngIf="showBookingForm">
-    <div class="booking-modal">
-        <header class="modal-header">
-            <h4>Agendar Horário: {{ selectedHorario?.time }}</h4>
-            <button class="close-button" (click)="closeBookingForm()">×</button>
-        </header>
+        <h4>Agendar Horário: {{ selectedHorario?.hora_inicio | slice:0:5 }}</h4>
+
+        <div *ngIf="erroDeConflito" class="error-message api-error">
+            {{ erroDeConflito }}
+        </div>
 
         <form [formGroup]="bookingForm" (ngSubmit)="onSubmitBooking()">
             <div class="form-group">

@@ -1,7 +1,10 @@
 from rest_framework import serializers
-from .models import TatuagemPost, Estilo, Cliente
+from .models import TatuagemPost, Estilo, Cliente, Agenda
 from django.contrib.auth.hashers import check_password
 from django.db.models import Count
+from django.utils import timezone
+from datetime import datetime, timedelta, time
+from django.db.models import Q
 
 # Importação local do Serializer de Posts
 # Este é um passo crucial para evitar importação circular se o TatuagemPostSerializer for usado em outro lugar.
@@ -62,6 +65,9 @@ class ClientLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
+
+
+
 class ClientProfileSerializer(serializers.ModelSerializer):
     # Serializa os posts curtidos
     posts_curtidos = serializers.SerializerMethodField()
@@ -76,3 +82,16 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         # Usa o Serializer de Posts para exibir os favoritos
         # Correção: Passa o contexto para resolver a URL da imagem.
         return TatuagemPostSerializer(posts, many=True, context=self.context).data
+
+
+class ClienteSerializer(serializers.ModelSerializer):
+    """
+    Serializer para o modelo Cliente, usado na busca rápida de agendamento.
+    """
+    class Meta:
+        model = Cliente
+        fields = [
+            'id', 
+            'nome',         
+        ]        
+        read_only_fields = fields

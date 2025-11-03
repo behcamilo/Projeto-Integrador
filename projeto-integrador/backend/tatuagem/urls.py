@@ -5,7 +5,8 @@ from .views import (
     ClientLoginView, 
     ClientProfileView,
     EstiloRegisterView,
-    LikePostView
+    LikePostView, 
+    ClientSearchView
 )
 
 urlpatterns = [
@@ -24,4 +25,6 @@ urlpatterns = [
     
     # Rota de Likes (Para o Cliente curtir/descurtir um post)
     path("posts/<int:post_id>/like/<int:client_id>/", LikePostView.as_view(), name="post-like"),
+
+    path("client/search/", ClientSearchView.as_view(), name="client-search"),    
 ]

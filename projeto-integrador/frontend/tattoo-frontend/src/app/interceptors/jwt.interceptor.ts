@@ -13,14 +13,24 @@ import { environment } from '../../environments/environment.development';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  
+
   constructor(private authService: AuthService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    
+
     const accessToken = this.authService.getAccessToken();
     const apiUrl = environment.apiUrl;
-    const isApiUrl = request.url.startsWith(apiUrl);
+
+
+    let apiRoot = apiUrl;
+      const match = apiUrl.match(/^(.*\/api\/)/);
+      if (match && match[1]) {
+          apiRoot = match[1]; // Ex: Retorna 'http://localhost:8000/api/'
+      }
+
+    // Agora verifica se a URL da requisição começa com a raiz COMUM da API
+    const isApiUrl = request.url.startsWith(apiRoot);
+    //const isApiUrl = request.url.startsWith(apiUrl);
 
     // CORREÇÃO: Exclui endpoints de autenticação da adição automática de token
     const isAuthEndpoint = request.url.includes('/login/') || request.url.includes('/register/');

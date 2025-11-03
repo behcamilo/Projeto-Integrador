@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings # Importar settings para referenciar o Custom User Model
 from django.contrib.auth.hashers import make_password # NOVO: Import para encriptar a senha
+from tattoo_artists.models import TattooArtist
 
 # Tabela para armazenar os estilos de tatuagem
 class Estilo(models.Model):
@@ -36,11 +37,18 @@ class Cliente(models.Model):
 
 # Agenda do tatuador
 class Agenda(models.Model):
+
+    #tattoo_artist = models.ForeignKey(
+    #    TattooArtist, 
+    #    on_delete=models.CASCADE, 
+    #    related_name='agendas'
+    #)
+
     STATUS_CHOICES = [
         ('disponivel', 'Disponível'),
         ('pendente', 'Pendente'),        
         ('reservado', 'Reservado'),      
-        ('indisponivel', 'Indisponível'),
+        ('ocupado', 'Ocupado'),
     ]
 
     # Referencia o modelo TattooArtist

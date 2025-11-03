@@ -1,11 +1,13 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
+#from rest_framework.decorators import action
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
 
 from .models import TatuagemPost, Cliente, Estilo
-from .serializers import TatuagemPostSerializer, ClientRegisterSerializer, ClientLoginSerializer, ClientProfileSerializer, EstiloSerializer
-
+from .serializers import (TatuagemPostSerializer, ClientRegisterSerializer, ClientLoginSerializer,
+ClientProfileSerializer, EstiloSerializer, ClienteSerializer)
+from datetime import date, time
 # --- VIEWS DE AUTENTICAÇÃO DO CLIENTE ---
 
 class ClientRegisterView(generics.CreateAPIView):
@@ -95,3 +97,26 @@ class LikePostView(APIView):
             action = 'liked'
         
         return Response({'status': action, 'total_curtidas': post.curtido_por.count()}, status=status.HTTP_200_OK)
+    
+
+
+class ClientSearchView(generics.ListAPIView):
+    """
+    Endpoint para buscar clientes por nome.
+    Acessível via GET /api/tatuagem/client/search/?nome={termo_busca}
+    """
+    # Apenas usuários autenticados (TattooArtists logados) podem buscar clientes
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ClienteSerializer 
+
+    def get_queryset(self):
+        # Obtém o termo de busca do parâmetro de consulta 'nome'
+        query_name = self.request.query_params.get('nome', None)
+        
+        if query_name:
+            # Filtra clientes cujo nome contenha o termo de busca (case-insensitive)
+            return Cliente.objects.filter(nome__icontains=query_name).order_by('nome')
+        
+        # Se nenhum termo de busca for fornecido, não retorna resultados
+        return Cliente.objects.none()
+    

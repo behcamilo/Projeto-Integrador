@@ -1,10 +1,11 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from tatuagem.models import Agenda 
 
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, AgendaSerializer
 
 TattooArtist = get_user_model()
 
@@ -54,3 +55,40 @@ class TattooArtistListView(generics.ListAPIView):
     serializer_class = UserSerializer
     # Permite acesso sem autenticação (feed é público)
     permission_classes = [permissions.AllowAny]
+
+
+
+class AgendaViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AgendaSerializer
+
+    def get_queryset(self):
+        # Filtra para que cada tatuador (usuário logado) só veja sua própria agenda
+        return Agenda.objects.filter(tatuador=self.request.user).order_by('data', 'hora_inicio')
+
+    def perform_create(self, serializer):
+        # Automaticamente atribui o usuário logado (tatuador) ao campo 'tatuador'
+        serializer.save(tatuador=self.request.user) 
+        
+    # Endpoint customizado para criar um slot VAZIO/DISPONÍVEL rapidamente (Útil para o tatuador)
+    ##########@action(detail=False, methods=['post'], url_path='disponibilizar')
+    def create_available_slot(self, request):
+        """Cria um novo slot de horário com status 'disponivel'."""
+        data = request.data
+        
+        # Cria um payload baseado no seu modelo, definindo o status como 'disponivel'
+        payload = {
+            'data': data.get('data'),
+            'hora_inicio': data.get('hora_inicio'),
+            'duracao_minutos': data.get('duracao_minutos', 60), # Default 60 se não enviado
+            'status': 'disponivel',
+            'cliente_id': None # Nenhum cliente
+        }
+        
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        
+        # Salva, atribuindo o tatuador logado
+        serializer.save(tatuador=self.request.user)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

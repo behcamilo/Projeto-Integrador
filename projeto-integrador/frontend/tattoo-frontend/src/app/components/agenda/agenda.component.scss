@@ -1,5 +1,3 @@
-// agenda.component.scss
-
 .booking-container {
     display: flex;
     max-width: 100%;
@@ -11,40 +9,55 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     min-height: 450px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    gap: 20px;
 }
 
 .calendar-panel {
     flex: 1.5;
     padding: 20px;
     border-right: 1px solid #333;
+    flex-shrink: 0;
+    max-width: 400px;
 }
 
 .calendar-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between !important;
     align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #555;
     margin-bottom: 15px;
 }
 
 .current-month {
-    color: #ff5722;
+    font-weight: bold;
     margin: 0;
-    font-size: 1.4em;
+    font-size: 1.2em;
+    color: #ff5722;
 }
 
 .nav-button {
-    background: none;
-    border: 1px solid #555;
-    color: #ff5722;
-    font-size: 1.2em;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
+    /* PROPRIEDADES CHAVES COM FORÇA MÁXIMA */
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important; /* Garantia de tamanho */
+    min-height: 40px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+
+    background: #3e3e3e !important;
+    border: 2px solid #555 !important; /* Borda mais grossa para visibilidade */
+    color: #ff5722 !important;
+    font-size: 1.5em !important; /* Setas bem visíveis */
+    padding: 0 !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
     transition: background-color 0.2s;
 }
 
 .nav-button:hover {
-    background-color: #333;
+    background-color: #555 !important;
 }
 
 .day-names {
@@ -100,6 +113,10 @@
     font-weight: bold;
 }
 
+// ====================================
+// 2. PAINEL DE HORÁRIOS
+// ====================================
+
 .hours-panel {
     flex: 1;
     padding: 20px;
@@ -115,53 +132,48 @@
     margin-bottom: 15px;
 }
 
-.hours-list {
+.hours-grid { /* Alterei hours-list para hours-grid para refletir o HTML do último exemplo */
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: auto;
 }
 
-.hour-slot {
-    flex-basis: calc(25% - 7.5px);
-    padding: 14px 10px;
+.time-slot { /* Alterei hour-slot para time-slot para refletir o HTML do último exemplo */
+    flex-basis: calc(33.33% - 6.7px); /* 3 colunas por linha */
+    padding: 10px 10px;
     font-size: 1.1em;
     border: none;
     border-radius: 5px;
     font-weight: 600;
-    cursor: pointer; // [MODIFICADO] Garante que todos sejam clicáveis
+    cursor: pointer;
     transition: background-color 0.2s, opacity 0.2s;
     text-align: center;
-    // [NOVO] para suportar a hora e o nome do usuário
     display: flex;
     flex-direction: column;
 }
 
-.hour-slot.disponivel {
-    background-color: #4CAF50;
+.time-slot.status-disponivel { /* CORRIGIDO: usa status- prefix */
+    background-color: #2e7d32; /* Verde mais escuro */
     color: white;
 }
 
-.hour-slot.reservado {
-    background-color: #FFC107; // Amarelo
+.time-slot.status-reservado {
+    background-color: #ffb300; /* Amarelo */
     color: #1e1e1e;
-    cursor: pointer; // [MODIFICADO] Permite clique
-    opacity: 1; // [MODIFICADO] Remove opacidade
 }
 
-.hour-slot.ocupado {
-    background-color: #F44336; // Vermelho
+.time-slot.status-ocupado {
+    background-color: #d32f2f; /* Vermelho mais escuro */
     color: white;
-    cursor: pointer; // [MODIFICADO] Permite clique
-    opacity: 1; // [MODIFICADO] Remove opacidade
 }
 
-.hour-slot:hover { // [MODIFICADO] Remove :not([disabled])
+.time-slot:hover {
     filter: brightness(1.1);
 }
 
-.booked-user { // [NOVO] Estilo para o nome do usuário
-    font-size: 0.7em;
+.slot-status {
+    font-size: 0.8em;
     font-weight: normal;
     margin-top: 3px;
     white-space: nowrap;
@@ -199,12 +211,15 @@
     margin-right: 5px;
 }
 
-.legend-dot.disponivel { background-color: #4CAF50; }
-.legend-dot.reservado { background-color: #FFC107; }
-.legend-dot.ocupado { background-color: #F44336; }
+.legend-dot.status-disponivel { background-color: #2e7d32; }
+.legend-dot.status-reservado { background-color: #ffb300; }
+.legend-dot.status-ocupado { background-color: #d32f2f; }
 
 
-/* [NOVO] Estilos para o Modal de Agendamento */
+// ====================================
+// MODAL DE AGENDAMENTO
+// ====================================
+
 .booking-modal-overlay {
     position: fixed;
     top: 0;
@@ -218,7 +233,7 @@
     z-index: 1000;
 }
 
-.booking-modal {
+.booking-modal-content { /* Corrigido de .booking-modal para content */
     background-color: #1e1e1e;
     padding: 25px;
     border-radius: 10px;
@@ -228,31 +243,13 @@
     color: #f0f0f0;
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #333;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-
-    h4 {
-        margin: 0;
-        color: #ff5722;
-    }
-}
-
-.close-button {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 1.5em;
-    cursor: pointer;
-    transition: color 0.2s;
-
-    &:hover {
-        color: #fff;
-    }
+.error-message.api-error {
+    background-color: #fdd835; /* Amarelo para destaque de erro */
+    color: #1e1e1e;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: bold;
 }
 
 .form-group {
