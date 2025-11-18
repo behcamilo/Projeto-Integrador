@@ -1,0 +1,16 @@
+# Conteúdo de frontend/Dockerfile.dev
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# copiar dependências primeiro
+COPY tattoo-frontend/package*.json ./
+RUN npm install
+
+# copiar o resto do código, incluindo o proxy.conf.json
+COPY tattoo-frontend/ .
+EXPOSE 4200
+
+# O CMD agora chama o script 'start' que inclui a configuração de proxy
+CMD ["npm", "start"]

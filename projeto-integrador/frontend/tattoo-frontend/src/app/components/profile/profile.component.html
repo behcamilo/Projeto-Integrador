@@ -1,0 +1,148 @@
+<div *ngIf="user" class="profile-page-container">
+    <h1>Perfil do Tatuador</h1>
+
+    <div class="profile-header-card">
+
+        <div class="profile-picture-container">
+            <img *ngIf="!isMyProfile" [src]="user.profile_picture_url || 'default-profile.png'" alt="Foto de Perfil" class="profile-picture">
+            
+            <label *ngIf="isMyProfile" for="profile-upload">
+                <img [src]="user.profile_picture_url || 'default-profile.png'" alt="Foto de Perfil" class="profile-picture">
+                <div class="upload-overlay">
+                    <p>Mudar Foto</p>
+                </div>
+            </label>
+        </div>
+
+        <input
+            *ngIf="isMyProfile"
+            type="file"
+            id="profile-upload"
+            #fileInput
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            style="display: none;"
+            [disabled]="uploading"
+        >
+
+        <div class="header-info">
+            <h2>{{ user.studio_name || user.username }}</h2>
+            <p class="bio">{{ user.bio || 'Bio não informada.' }}</p>
+            <p class="email">Email: {{ user.email }}</p>
+
+            <button
+                *ngIf="isMyProfile"
+                class="upload-button-action"
+                (click)="triggerFileInputClick()"
+                [disabled]="uploading"
+            >
+                {{ uploading ? 'Enviando...' : 'Mudar Foto' }}
+            </button>
+
+            <div *ngIf="uploadMessage && isMyProfile" class="upload-message" [class.error]="uploadMessage.includes('Erro')">
+                {{ uploadMessage }}
+            </div>
+
+        </div>
+
+        <button
+            *ngIf="isMyProfile"
+            class="logout-button"
+            (click)="authService.logout(); router.navigate(['/login'])"
+        >
+            Sair da Conta
+        </button>
+
+    </div>
+
+    <app-agenda 
+        *ngIf="artistId" 
+        [artistId]="artistId" 
+        [isOwner]="isMyProfile">
+    </app-agenda>
+
+
+    <div *ngIf="isMyProfile" class="new-post-form-card">
+        <h3 class="section-title">Criar Nova Postagem</h3>
+        <form [formGroup]="postForm" (ngSubmit)="onPostSubmit()">
+            
+            <div class="form-group">
+                <textarea formControlName="descricao" placeholder="Descrição da tatuagem..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tamanho">Tamanho (cm):</label>
+                    <input id="tamanho" type="text" formControlName="tamanho" placeholder="Ex: 15x10">
+                </div>
+                <div class="form-group">
+                    <label for="preco">Preço (R$):</label>
+                    <input id="preco" type="number" formControlName="preco" placeholder="250.00">
+                </div>
+                <div class="form-group">
+                    <label for="estilo">Estilo:</label>
+                    <select id="estilo" formControlName="estilo_id">
+                        <option [ngValue]="null" disabled>Selecione um estilo</option>
+                        <option *ngFor="let estilo of estilos" [ngValue]="estilo.id">
+                            {{ estilo.nome }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group file-upload-group">
+                <input
+                    type="file"
+                    id="post-file-upload"
+                    #postFileInput
+                    (change)="onPostFileSelected($event)"
+                    accept="image/*"
+                    style="display: none;"
+                >
+                <button 
+                    type="button" 
+                    class="upload-button-action" 
+                    (click)="triggerPostFileInputClick()">
+                    {{ postFile ? postFile.name : 'Selecionar Imagem' }}
+                </button>
+                <div *ngIf="postForm.get('imagem')?.invalid && (postForm.get('imagem')?.touched || postSubmissionError)" class="error-message">
+                    Uma imagem é obrigatória.
+                </div>
+            </div>
+
+            <div *ngIf="postSubmissionError" class="error-message server-error">
+                {{ postSubmissionError }}
+            </div>
+
+            <button type="submit" [disabled]="postForm.invalid" class="submit-button">Postar Tatuagem</button>
+        </form>
+    </div>
+
+
+    <h3 class="section-title">Minhas Tatuagens Postadas</h3>
+
+    <div class="posts-grid">
+        <div *ngFor="let post of user?.posts" class="tattoo-post-card">
+            
+            <div class="post-image-placeholder">
+                <img [src]="post.imagem_url || 'default-profile.png'" alt="{{ post.descricao }}" class="post-image">
+            </div>
+
+            <div class="post-details">
+                <p class="post-description">{{ post.descricao || 'Sem descrição' }}</p>
+                <div class="detail-row">
+                    <span>{{ post.estilo?.nome || 'N/A' }}</span>
+                    <span>{{ (post.preco > 0) ? ('R$ ' + post.preco) : 'A consultar' }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <p *ngIf="!user?.posts || user?.posts.length === 0" class="no-posts-message">
+            Você ainda não fez nenhuma postagem.
+        </p>
+    </div>
+</div>
+
+<div *ngIf="!user" class="loading-state">
+    Carregando informações do perfil...
+</div>

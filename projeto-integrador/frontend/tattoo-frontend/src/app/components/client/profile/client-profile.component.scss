@@ -1,0 +1,127 @@
+// frontend/tattoo-frontend/src/app/components/client/profile/client-profile.component.scss
+
+@use 'sass:color';
+@use '../shared-auth.scss'; 
+@use '../../profile/profile.component.scss'; // Reutiliza estilos base do perfil
+
+// Sobrescreve ou adiciona estilos específicos
+
+.profile-picture-container {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden; // Garante que o overlay não vaze
+    border-radius: 50%;
+    
+    // Garante tamanho fixo para o container
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+
+    img.profile-picture {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    // Overlay "Alterar Foto"
+    .upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #F0F0F0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        font-weight: bold;
+        font-size: 0.9em;
+        text-align: center;
+    }
+
+    &:hover .upload-overlay {
+        opacity: 1;
+    }
+}
+
+.upload-message {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #4CAF50; // Verde sucesso
+    
+    &.error {
+        color: #F44336; // Vermelho erro
+    }
+}
+
+// Ajustes do Grid de Favoritos
+.liked-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.no-posts-message {
+    color: #999;
+    padding: 40px;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.1em;
+}
+
+// Cards de postagem
+.tattoo-post-card {
+    background-color: #2A2A2A;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+    
+    &:hover {
+        transform: translateY(-5px);
+    }
+
+    .post-image-placeholder {
+        height: 250px;
+        overflow: hidden;
+        background: #000;
+    }
+    
+    .post-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .post-details {
+        padding: 15px;
+        color: #F0F0F0;
+    }
+
+    .card-actions {
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        
+        .remove-like {
+            background-color: #D7263D;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            
+            &:hover {
+                background-color: color.scale(#D7263D, $lightness: -10%);
+            }
+        }
+    }
+}

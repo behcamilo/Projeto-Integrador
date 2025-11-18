@@ -1,0 +1,135 @@
+<div class="booking-container">
+    <div class="calendar-panel">
+        <header class="calendar-header">
+            <button (click)="changeMonth(-1)" class="nav-button">&#10094;</button>
+            <h4 class="current-month">{{ currentMonthYear | titlecase }}</h4>
+            <button (click)="changeMonth(1)" class="nav-button">&#10095;</button>
+        </header>
+
+        <div class="day-names">
+            <span>Dom</span>
+            <span>Seg</span>
+            <span>Ter</span>
+            <span>Qua</span>
+            <span>Qui</span>
+            <span>Sex</span>
+            <span>Sab</span>
+        </div>
+
+        <div class="days-grid">
+            <ng-container *ngFor="let day of daysOfMonth">
+                <button
+                    *ngIf="day; else emptyCell"
+                    class="day-cell"
+                    [class.selected]="isDaySelected(day)"
+                    [class.has-appointments]="hasAppointments(day)"
+                    (click)="selectDay(day)"
+                >
+                    {{ day.getDate() }}
+                </button>
+                <ng-template #emptyCell>
+                    <span class="day-cell empty"></span>
+                </ng-template>
+            </ng-container>
+        </div>
+    </div>
+
+    <div class="hours-panel">
+        <h4 *ngIf="selectedDate && selectedDate.getFullYear() !== 1970" class="hours-header">
+            Horários para {{ selectedDate | date:'fullDate' }}
+        </h4>
+        <h4 *ngIf="!selectedDate || selectedDate.getFullYear() === 1970" class="hours-header">
+            Selecione uma data no calendário
+        </h4>
+
+        <div class="hours-list">
+            <ng-container *ngIf="horariosDisponiveis.length > 0; else noHours">
+                <button
+                    *ngFor="let horario of horariosDisponiveis"
+                    class="hour-slot"
+                    [ngClass]="horario.status"
+                    (click)="agendarHorario(horario)"
+                >
+                    <span>{{ horario.time }}</span>
+                    <span *ngIf="horario.nome_usuario" class="booked-user">{{ horario.nome_usuario }}</span>
+                </button>
+            </ng-container>
+
+            <ng-template #noHours>
+                <p class="no-hours-message">Nenhum horário registrado para esta data ou a agenda está fechada.</p>
+            </ng-template>
+        </div>
+
+        <div class="schedule-legend">
+            <span><i class="legend-dot disponivel"></i> Disponível</span>
+            <span><i class="legend-dot reservado"></i> Solicitação</span>
+            <span><i class="legend-dot ocupado"></i> Ocupado</span>
+        </div>
+    </div>
+</div>
+
+
+<div class="booking-modal-overlay" *ngIf="showBookingForm">
+    <div class="booking-modal">
+        <header class="modal-header">
+            <h4>
+                Agendar: {{ selectedHorario?.time }}
+                <span *ngIf="selectedHorario?.status === 'reservado'">(Solicitação)</span>
+            </h4>
+            <button class="close-button" (click)="closeBookingForm()">×</button>
+        </header>
+
+        <div *ngIf="isOwner && selectedHorario?.status === 'reservado'; else normalForm">
+            <p style="margin-bottom: 20px; color: #ccc;">
+                O cliente <strong>{{ selectedHorario?.nome_usuario }}</strong> solicitou este horário.
+                Deseja confirmar?
+            </p>
+            <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                <button class="confirm-button" (click)="responderSolicitacao(true)" style="background-color: #4CAF50;">
+                    Confirmar (Ocupar)
+                </button>
+                <button class="cancel-button" (click)="responderSolicitacao(false)" style="background-color: #F44336;">
+                    Recusar (Liberar)
+                </button>
+            </div>
+        </div>
+
+        <ng-template #normalForm>
+            <form [formGroup]="bookingForm" (ngSubmit)="onSubmitBooking()">
+                <div class="form-group">
+                    <label for="userName">Nome do Usuário:</label>
+                    <input
+                        id="userName"
+                        type="text"
+                        formControlName="userName"
+                        placeholder="Digite o nome do usuário"
+                        required
+                    >
+                </div>
+
+                <div class="form-group" *ngIf="isOwner">
+                    <label for="reservationType">Status:</label>
+                    <select id="reservationType" formControlName="reservationType">
+                        <option value="disponivel">Disponível</option>
+                        <option value="reservado">Reserva (Amarelo)</option>
+                        <option value="ocupado">Ocupado (Vermelho)</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button
+                        type="submit"
+                        [disabled]="bookingForm.invalid"
+                        class="confirm-button"
+                    >
+                        Salvar
+                    </button>
+                    <button type="button" (click)="closeBookingForm()" class="cancel-button">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </ng-template>
+
+    </div>
+</div>

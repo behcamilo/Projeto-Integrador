@@ -1,0 +1,12 @@
+*.jpg
+*.png
+# Ignore Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar arquivos .pyc
+**/*.pyc
+
+# Ignorar diretórios __pycache__ em qualquer nível
+__pycache__/

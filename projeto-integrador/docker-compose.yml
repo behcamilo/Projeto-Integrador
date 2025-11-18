@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: django-backend
+    # COMANDO CORRIGIDO: Usa sh -c para executar as migrações (migrate)
+    # e só depois iniciar o servidor (runserver).
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=tattoo_db
+      - DB_USER=tattoo_user
+      - DB_PASSWORD=tattoo_pass
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: tattoo_db
+      POSTGRES_USER: tattoo_user
+      POSTGRES_PASSWORD: tattoo_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: angular-frontend
+    volumes:
+      - ./frontend/tattoo-frontend:/app
+      - /app/node_modules  # evita conflito de node_modules com host
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
