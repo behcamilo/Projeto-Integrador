@@ -10,7 +10,13 @@ import { ClientProfileComponent } from './components/client/profile/client-profi
 export const routes: Routes = [
     { path: 'login', component: LoginComponent, title: 'Tatuador Login' },
     { path: 'register', component: RegisterComponent, title: 'Tatuador Registro' },
+    
+    // Rota original (Perfil do Tatuador Logado)
     { path: 'perfil', component: ProfileComponent, title: 'Perfil do Tatuador' }, 
+    
+    // *** ROTA ADICIONADA ***
+    // Rota para o perfil público de um artista específico
+    { path: 'artista/:id', component: ProfileComponent, title: 'Perfil do Artista' },
     
     // Rotas de Cliente
     { path: 'cliente/login', component: ClientLoginComponent, title: 'Cliente Login' },

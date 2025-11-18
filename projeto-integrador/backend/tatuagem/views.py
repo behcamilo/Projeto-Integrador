@@ -1,10 +1,11 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
+from django.shortcuts import get_object_or_404
 
-from .models import TatuagemPost, Cliente, Estilo
-from .serializers import TatuagemPostSerializer, ClientRegisterSerializer, ClientLoginSerializer, ClientProfileSerializer, EstiloSerializer
+from .models import TatuagemPost, Cliente, Estilo, Agenda
+from .serializers import TatuagemPostSerializer, ClientRegisterSerializer, ClientLoginSerializer, ClientProfileSerializer, EstiloSerializer, AgendaSerializer
 
 # --- VIEWS DE AUTENTICAÇÃO DO CLIENTE ---
 
@@ -27,29 +28,28 @@ class ClientLoginView(APIView):
         except Cliente.DoesNotExist:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Verifica a senha usando o hash
         if check_password(password, client.password):
-            # NOVO: Aqui, emitimos um token de sessão simples para o cliente
-            # Em uma arquitetura real, usaria JWT customizado. Por simplicidade, usamos um token simples.
-            # Se você usar sessões no Django, a resposta pode ser ajustada.
-            # Vamos retornar o ID do cliente como um "token" temporário para o frontend
             return Response({'client_id': client.id, 'nome': client.nome}) 
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class ClientProfileView(APIView):
-    # Permissão para o GET ser feito pelo cliente logado (simplificado pelo ID)
     permission_classes = [permissions.AllowAny] 
     
     def get(self, request, client_id, *args, **kwargs):
-        try:
-            client = Cliente.objects.get(pk=client_id)
-        except Cliente.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        # CORREÇÃO: Garante que o contexto da requisição está sendo passado para o Serializer
+        client = get_object_or_404(Cliente, pk=client_id)
         serializer = ClientProfileSerializer(client, context={'request': request})
         return Response(serializer.data)
+
+    # ADICIONADO: Método PATCH para atualizar foto (e outros dados)
+    def patch(self, request, client_id, *args, **kwargs):
+        client = get_object_or_404(Cliente, pk=client_id)
+        # 'partial=True' permite enviar apenas o campo avatar
+        serializer = ClientProfileSerializer(client, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # --- VIEWS DE POSTS E LIKES ---
@@ -69,15 +69,12 @@ class EstiloRegisterView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Estilo.objects.all()
         nome = self.request.query_params.get('nome')
-
         if nome:
             queryset = queryset.filter(nome__icontains=nome)
-
         return queryset
 
 class LikePostView(APIView):
-    # NOVO: Esta view é para o Cliente curtir ou descurtir um post
-    permission_classes = [permissions.AllowAny] # Mude para IsClientAuthenticated se usar tokens
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, post_id, client_id):
         try:
@@ -86,7 +83,6 @@ class LikePostView(APIView):
         except (TatuagemPost.DoesNotExist, Cliente.DoesNotExist):
             return Response({'error': 'Post ou Cliente não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         
-        # Lógica de curtir/descurtir
         if post in client.posts_curtidos.all():
             client.posts_curtidos.remove(post)
             action = 'unliked'
@@ -95,3 +91,22 @@ class LikePostView(APIView):
             action = 'liked'
         
         return Response({'status': action, 'total_curtidas': post.curtido_por.count()}, status=status.HTTP_200_OK)
+
+class AgendaViewSet(viewsets.ModelViewSet):
+    serializer_class = AgendaSerializer
+    permission_classes = [permissions.AllowAny] 
+
+    def get_queryset(self):
+        tatuador_id = self.kwargs.get('artist_id')
+        if not tatuador_id:
+            return Agenda.objects.none()
+            
+        queryset = Agenda.objects.filter(tatuador_id=tatuador_id)
+        date_param = self.request.query_params.get('date')
+        if date_param:
+            queryset = queryset.filter(data=date_param)
+        return queryset.order_by('hora_inicio')
+
+    def perform_create(self, serializer):
+        tatuador_id = self.kwargs.get('artist_id')
+        serializer.save(tatuador_id=tatuador_id)

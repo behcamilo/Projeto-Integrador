@@ -4,10 +4,14 @@ $primary-red: #D7263D;
 $dark-background: #1A1A1A;
 $card-background: #2A2A2A;
 $text-color-light: #F0F0F0;
-$border-radius-card: 15px; // Ajustado para ser mais arredondado
+$border-radius-card: 15px;
 $border-radius-input: 8px;
 $card-border: #333333;
 $heart-color: #FF69B4;
+// Adicionadas
+$input-background: #4A4A4A;
+$input-text-color: #E0E0E0;
+
 
 .profile-page-container {
     background-color: $dark-background;
@@ -30,7 +34,7 @@ h1 {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
-    justify-content: space-between; // Espaça os elementos
+    justify-content: space-between; 
     gap: 30px;
     
     @media (max-width: 768px) {
@@ -45,7 +49,7 @@ h1 {
     border-radius: 50%;
     width: 120px;
     height: 120px;
-    min-width: 120px; /* Evita que encolha */
+    min-width: 120px; 
     
     .profile-picture {
         width: 100%;
@@ -108,12 +112,14 @@ h1 {
     border-bottom: 2px solid $primary-red;
     padding-bottom: 5px;
     margin-bottom: 20px;
+    margin-top: 40px; // Adiciona espaço antes do título
 }
 
 /* 🎯 ESTILO UNIFICADO PARA OS BOTÕES (MUDAR FOTO e SAIR) */
 
 .upload-button-action,
-.logout-button {
+.logout-button,
+.submit-button { // Adicionado .submit-button
     background-color: $primary-red;
     color: $text-color-light;
     border: none;
@@ -140,14 +146,87 @@ h1 {
 }
 
 .logout-button {
-    // Alinhamento à direita no header-card (em telas grandes)
     align-self: flex-start;
     
     @media (max-width: 768px) {
-        align-self: stretch; /* Ocupa a largura total em telas menores */
+        align-self: stretch; 
         margin-top: 20px;
     }
 }
+
+/* --- [NOVO] ESTILOS PARA FORMULÁRIO DE POSTAGEM --- */
+
+.new-post-form-card {
+    background-color: $card-background;
+    border-radius: $border-radius-card;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+
+    .form-group {
+        margin-bottom: 20px;
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba($text-color-light, 0.8);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid $card-border;
+            border-radius: $border-radius-input;
+            background-color: $input-background;
+            color: $input-text-color;
+            font-size: 1em;
+            box-sizing: border-box;
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px $primary-red;
+            }
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+    }
+    
+    .file-upload-group {
+        .upload-button-action {
+            margin-top: 0;
+            width: 100%;
+            max-width: 300px;
+            background-color: #444; // Cor diferente para o botão de arquivo
+            &:hover { background-color: #555; }
+        }
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .error-message {
+        color: $primary-red;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+    .server-error {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+}
+
 
 /* --- ESTILOS DO FEED/CARDS (Placeholder) --- */
 
@@ -157,8 +236,15 @@ h1 {
     gap: 30px;
 }
 
+.no-posts-message {
+    color: #999;
+    padding: 20px;
+    text-align: center;
+    font-style: italic;
+}
+
 .tattoo-post-card {
-    background-color: $dark-background;
+    background-color: $card-background; // [ALTERADO] Fundo do card
     border: 1px solid $card-border;
     border-radius: 20px;
     overflow: hidden;
@@ -167,17 +253,30 @@ h1 {
     flex-direction: column;
 
     .post-image-placeholder {
-        height: 200px;
+        height: 300px; // [ALTERADO] Maior altura
         background: #000;
         display: flex;
         justify-content: center;
         align-items: center;
         color: rgba($text-color-light, 0.5);
         border-bottom: 1px solid $card-border;
+        overflow: hidden; // Garante que a imagem não vaze
+    }
+    
+    // [NOVO] Estilo para a imagem do post
+    .post-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .post-details {
         padding: 15px;
+    }
+    
+    .post-description {
+        margin-bottom: 10px;
+        color: rgba($text-color-light, 0.9);
     }
 
     .detail-row {
@@ -186,6 +285,7 @@ h1 {
         margin-bottom: 10px;
         font-weight: 500;
         color: $text-color-light;
+        font-size: 0.9em;
     }
     
     .card-actions {
@@ -193,6 +293,7 @@ h1 {
         align-items: center;
         justify-content: space-between;
         margin-top: 10px;
+        padding: 0 15px 15px 15px; // [ALTERADO] Padding no actions
 
         .like-button {
             background: $dark-background;

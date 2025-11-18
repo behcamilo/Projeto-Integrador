@@ -1,44 +1,44 @@
-// src/app/agenda/agenda.ts
-
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// [NOVO] Imports necessários para o formulário
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Horario } from '../models/agenda.models'; // Assumindo que a interface foi atualizada
-import { AgendamentoService } from '../../services/agenda.service';// <--- O serviço que você precisa criar
+import { Horario } from '../models/agenda.models';
+import { AgendamentoService } from '../../services/agenda.service';
 
 @Component({
   selector: 'app-agenda',
   standalone: true,
-  // [MODIFICADO] Adiciona ReactiveFormsModule
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './agenda.component.html',
   styleUrls: ['./agenda.component.scss']
 })
 export class AgendaComponent implements OnInit {
 
+  @Input() artistId: number | null = null;
+  @Input() isOwner: boolean = false; 
+
   currentDate = new Date();
   selectedDate!: Date;
   daysOfMonth: (Date | null)[] = [];
   horariosDisponiveis: Horario[] = [];
 
-  // Propriedades do formulário/modal
   showBookingForm: boolean = false;
   selectedHorario: Horario | null = null;
   bookingForm!: FormGroup;
 
-  // [CORRIGIDO] O constructor agora injeta o serviço e NADA MAIS.
   constructor(private agendamentoService: AgendamentoService) { }
 
-  // [CORRIGIDO] O ngOnInit agora está no lugar certo
   ngOnInit(): void {
+    if (!this.artistId) {
+        console.warn("AgendaComponent: artistId é necessário para carregar.");
+        return; 
+    }
+    
     this.generateCalendarDays(this.currentDate.getFullYear(), this.currentDate.getMonth());
     const today = new Date();
     this.selectDay(today);
     this.initBookingForm();
   }
 
-  // [CORRIGIDO] Função de inicialização do formulário
   initBookingForm(): void {
     this.bookingForm = new FormGroup({
       userName: new FormControl('', Validators.required),
@@ -46,26 +46,21 @@ export class AgendaComponent implements OnInit {
     });
   }
 
-  // [CORRIGIDO] Função original de geração de dias
   generateCalendarDays(year: number, month: number): void {
     this.daysOfMonth = [];
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-
     let startDayOfWeek = firstDay.getDay();
-
     const daysToShift = startDayOfWeek;
 
     for (let i = 0; i < daysToShift; i++) {
       this.daysOfMonth.push(null);
     }
-
     for (let i = 1; i <= lastDay.getDate(); i++) {
       this.daysOfMonth.push(new Date(year, month, i));
     }
   }
 
-  // [NOVO/MODIFICADO] Cria APENAS os slots base (todos 'disponivel')
   private getSlotsBase(date: Date): Horario[] {
     const dayOfWeek = date.getDay();
     const workHours: string[] = [
@@ -90,40 +85,46 @@ export class AgendaComponent implements OnInit {
     });
   }
 
-  // [NOVO] Carrega os agendamentos reais do backend e funde com os slots base
   private loadHorariosDoBackend(date: Date): void {
+      if (!this.artistId) return; 
+
       const dateStr = this.formatDate(date);
       const slotsBase = this.getSlotsBase(date);
 
-      this.agendamentoService.getAgendamentosPorData(dateStr).subscribe({
+      this.agendamentoService.getAgendamentosPorData(this.artistId, dateStr).subscribe({
           next: (agendamentosAPI: Horario[]) => {
               const agendamentosMap = new Map<string, Horario>();
               agendamentosAPI.forEach(h => {
-                  // Usa o campo 'time' que o serializador do Django deve fornecer
                   if (h.time) {
                       agendamentosMap.set(h.time, h);
                   }
               });
-
-              // Combina: se a API retornou um agendamento para o slot, use-o; senão, use o slot base 'disponível'.
+              
               this.horariosDisponiveis = slotsBase.map(slot => {
-                  return agendamentosMap.get(slot.time) || slot;
+                  const found = agendamentosMap.get(slot.time);
+                  if (found) {
+                      // [IMPORTANTE] Garante que o data_hora esteja presente para edições futuras
+                      found.data_hora = slot.data_hora; 
+                      
+                      if (found.status === 'indisponivel') {
+                          found.status = 'ocupado'; 
+                      }
+                      return found;
+                  }
+                  return slot;
               });
           },
           error: (err) => {
               console.error('Erro ao carregar agendamentos:', err);
-              // Em caso de falha na API, exibe apenas os slots vazios
               this.horariosDisponiveis = slotsBase;
           }
       });
   }
 
-
-  // [MODIFICADO] selectDay
   selectDay(date: Date | null): void {
     if (!date) return;
     this.selectedDate = date;
-    this.loadHorariosDoBackend(date); // Chama a API
+    this.loadHorariosDoBackend(date); 
   }
 
   formatDate(date: Date): string {
@@ -133,30 +134,18 @@ export class AgendaComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  // [MODIFICADO] hasAppointments (Manteve a borda amarela)
-  // Nota: Para verificar APENAS dias com agendamento (borda amarela) sem carregar todos os dados,
-  // o ideal seria uma API separada /api/has_appointments?month=YYYY-MM.
-  // No momento, usamos a lista de slots base para cobrir os dias úteis.
   hasAppointments(date: Date | null): boolean {
      if (!date) return false;
-
-     // 1. Verifica se o dia atual selecionado (e carregado) tem agendamentos
      if (this.selectedDate && this.formatDate(date) === this.formatDate(this.selectedDate)) {
          return this.horariosDisponiveis.filter(h => h.status !== 'disponivel').length > 0;
      }
-
-     // 2. Para manter a borda amarela em todos os dias úteis (como antes da simulação):
      return this.getSlotsBase(date).length > 0;
-
-     // Se você quiser a borda amarela SOMENTE nos dias com agendamentos REAIS,
-     // você terá que remover o item 2 e criar a API de consulta por mês.
   }
 
   changeMonth(delta: number): void {
     const newMonth = this.currentDate.getMonth() + delta;
     this.currentDate.setMonth(newMonth);
     this.generateCalendarDays(this.currentDate.getFullYear(), this.currentDate.getMonth());
-
     const firstDayOfMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
     this.selectDay(firstDayOfMonth);
   }
@@ -170,7 +159,6 @@ export class AgendaComponent implements OnInit {
     return this.formatDate(date) === this.formatDate(this.selectedDate);
   }
 
-  // [CORRIGIDO] agendarHorario (apenas reposicionada)
   agendarHorario(horario: Horario): void {
     this.selectedHorario = horario;
     this.showBookingForm = true;
@@ -184,37 +172,66 @@ export class AgendaComponent implements OnInit {
     });
   }
 
-  // [MODIFICADO] onSubmitBooking (agora chama o serviço)
-  onSubmitBooking(): void {
-    if (this.bookingForm.valid && this.selectedHorario) {
-      const { userName, reservationType } = this.bookingForm.value;
+  responderSolicitacao(aceitar: boolean): void {
+      if (!this.selectedHorario || !this.artistId) return;
+
+      const novoStatus = aceitar ? 'indisponivel' : 'disponivel'; 
+      const novoNomeUsuario = aceitar ? this.selectedHorario.nome_usuario : '';
 
       const dataToSave: Horario = {
           id: this.selectedHorario.id,
-          nome_usuario: userName,
-          status: reservationType,
+          nome_usuario: novoNomeUsuario,
+          status: novoStatus as any, 
           data_hora: this.selectedHorario.data_hora,
           time: this.selectedHorario.time
       };
 
-      // Chamada real à API
-      this.agendamentoService.saveAgendamento(dataToSave).subscribe({
-        next: (response) => {
-            console.log('Agendamento salvo/atualizado:', response);
-            // Recarrega os dados do dia, o que garante que a UI reflita a mudança
+      // [CORREÇÃO] Passa opções para controlar o client_id
+      const options = aceitar 
+          ? { skipClientAuth: true } // Aceitar: Mantém o cliente atual
+          : { clearClient: true };   // Recusar: Limpa o cliente
+
+      this.agendamentoService.saveAgendamento(this.artistId, dataToSave, options).subscribe({
+          next: () => {
+              alert(aceitar ? 'Agendamento confirmado!' : 'Agendamento recusado/cancelado.');
+              this.selectDay(this.selectedDate); 
+              this.closeBookingForm();
+          },
+          error: (err) => {
+              console.error('Erro ao responder solicitação', err);
+              alert('Erro ao atualizar. Tente novamente.');
+          }
+      });
+  }
+
+  onSubmitBooking(): void {
+    if (this.bookingForm.valid && this.selectedHorario && this.artistId) {
+      const { userName, reservationType } = this.bookingForm.value;
+
+      let statusBackend = reservationType;
+      if (reservationType === 'ocupado') statusBackend = 'indisponivel';
+
+      const dataToSave: Horario = {
+          id: this.selectedHorario.id,
+          nome_usuario: userName,
+          status: statusBackend, 
+          data_hora: this.selectedHorario.data_hora,
+          time: this.selectedHorario.time
+      };
+
+      this.agendamentoService.saveAgendamento(this.artistId, dataToSave).subscribe({
+        next: () => {
             this.selectDay(this.selectedDate);
             this.closeBookingForm();
         },
         error: (error) => {
             console.error('Erro ao salvar agendamento:', error);
-            // Mostrar erro na UI (ex: slot já ocupado, falha de CORS, etc.)
-            alert('Erro ao salvar agendamento. Verifique se o backend está acessível.');
+            alert('Erro ao salvar agendamento.');
         }
       });
     }
   }
 
-  // [CORRIGIDO] closeBookingForm (apenas reposicionada)
   closeBookingForm(): void {
     this.showBookingForm = false;
     this.selectedHorario = null;

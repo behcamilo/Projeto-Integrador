@@ -1,9 +1,21 @@
 <div *ngIf="profile && !isLoading" class="profile-page-container">
     <div class="profile-header-card">
         
-        <div class="profile-picture-container">
-            <img [src]="getProfileImageUrl(profile.avatar)" alt="Avatar do Cliente" class="profile-picture">
+        <div class="profile-picture-container" (click)="triggerFileInputClick()">
+            <img [src]="profile.avatar_url || 'default-profile.png'" alt="Avatar do Cliente" class="profile-picture">
+            <div class="upload-overlay">
+                <p>Alterar Foto</p>
+            </div>
         </div>
+
+        <input
+            type="file"
+            #fileInput
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            style="display: none;"
+            [disabled]="uploading"
+        >
         
         <div class="header-info">
             <h2>{{ profile.nome }}</h2>
@@ -12,10 +24,15 @@
             
             <button 
                 class="upload-button-action" 
-                disabled
+                (click)="triggerFileInputClick()"
+                [disabled]="uploading"
             >
-                Atualizar Meus Dados
+                {{ uploading ? 'Enviando...' : 'Mudar Foto de Perfil' }}
             </button>
+
+            <div *ngIf="uploadMessage" class="upload-message" [class.error]="uploadMessage.includes('Erro')">
+                {{ uploadMessage }}
+            </div>
         </div>
 
         <button 
@@ -53,7 +70,7 @@
         </div>
 
         <ng-template #noPosts>
-            <p class="no-posts-message">Você ainda não curtiu nenhuma tatuagem para aparecer aqui. Curta posts no Feed para salvá-los aqui!</p>
+            <p class="no-posts-message">Você ainda não curtiu nenhuma tatuagem. Explore o Feed e deixe seu like!</p>
         </ng-template>
     </div>
 </div>

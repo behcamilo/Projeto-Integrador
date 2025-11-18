@@ -44,8 +44,9 @@ export class ClientLoginComponent {
              localStorage.setItem('client_id', response.client_id.toString());
              localStorage.setItem('client_name', response.nome || 'Cliente');
 
-             // NAVEGAÇÃO: Chamada simples para a rota
-             this.router.navigate(['/cliente/perfil']); 
+             // *** ALTERAÇÃO AQUI ***
+             // NAVEGAÇÃO: Altera de '/cliente/perfil' para '/home'
+             this.router.navigate(['/home']); 
 
           } else {
              // Se o login foi 200 OK, mas o body não tem o ID (problema no backend)

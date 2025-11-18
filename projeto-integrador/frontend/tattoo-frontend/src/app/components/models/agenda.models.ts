@@ -1,7 +1,8 @@
 export interface Horario {
   id?: number;
   time: string;
-  status: 'disponivel' | 'reservado' | 'ocupado';
+  // [CORREÇÃO] Adicionado 'indisponivel' para evitar o erro de comparação TS2367
+  status: 'disponivel' | 'reservado' | 'ocupado' | 'indisponivel';
   data_hora?: string;
   nome_usuario?: string;
 }

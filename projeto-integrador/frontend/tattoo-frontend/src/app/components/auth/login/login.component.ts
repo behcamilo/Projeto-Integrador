@@ -1,4 +1,3 @@
-
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
@@ -21,8 +20,10 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router
   ) {
+    // *** ALTERAÇÃO AQUI ***
+    // O formulário agora usa 'username' em vez de 'email'
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', Validators.required],
       password: ['', Validators.required]
     });
   }
@@ -38,20 +39,19 @@ export class LoginComponent {
         next: (response) => {
 
           console.log('Login successful', response);
-
-          // ❌ ANTES: this.router.navigate(['/me']);
-
-          // ✅ AGORA: Redireciona para a rota /home, que é onde o perfil do usuário é exibido.
-
-          this.router.navigate(['/home']); 
+          
+          // Redireciona para a rota /perfil do tatuador
+          this.router.navigate(['/perfil']); 
 
         },
 
         error: (err) => {
 
           console.error('Login failed', err);
-
-          this.error = 'Credenciais inválidas. Verifique seu e-mail e senha.';
+          this.error = 'Credenciais inválidas. Verifique seu usuário e senha.';
+          if (err.status === 401) {
+              this.error = 'Usuário ou senha inválidos.';
+          }
 
         }
 

@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from django.conf.urls.static import static # <-- Importação necessária
+from django.conf.urls.static import static # <-- 1. ADICIONE ESTA IMPORTAÇÃO
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +30,7 @@ urlpatterns += [
     path("api/tatuagem/", include("tatuagem.urls")), 
 ]
 
+# 2. ADICIONE ESTE BLOCO NO FINAL DO ARQUIVO
 # NOVO: Apenas em modo DEBUG, servimos os arquivos de mídia
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

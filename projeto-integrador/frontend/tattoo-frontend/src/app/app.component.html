@@ -30,32 +30,39 @@
         margin-right: 10px;
     }
 
+    .nav-links {
+        display: flex;
+        align-items: center;
+    }
+
     .nav-links a {
         color: #F0F0F0;
         text-decoration: none;
         margin-left: 25px;
         font-weight: 500;
         transition: color 0.3s ease;
+        cursor: pointer;
 
         &:hover {
             color: rgba(240, 240, 240, 0.8);
         }
     }
 
-    /* CORREÇÃO DE ESTILO: Botão Login Cliente (Agora usando a cor do tema) */
+    /* Estilo específico APENAS para o botão de Login (quando deslogado) */
     .client-login-button {
         font-weight: bold;
-        color: #F0F0F0; 
-        background-color: #D7263D; 
-        padding: 8px 12px;
-        border-radius: 8px; 
+        color: #D7263D !important; /* Força a cor vermelha no texto */
+        background-color: #F0F0F0; /* Fundo branco */
+        padding: 8px 15px;
+        border-radius: 20px; 
         margin-left: 30px !important; 
-        border: 1px solid #F0F0F0; 
-        transition: background-color 0.3s ease;
+        border: 2px solid #F0F0F0; 
+        transition: all 0.3s ease;
         text-decoration: none;
 
         &:hover {
-             background-color: #a31c2e; 
+             background-color: #e0e0e0;
+             border-color: #e0e0e0;
         }
     }
 </style>
@@ -67,11 +74,16 @@
     </div>
     <nav class="nav-links">
         <a [routerLink]="['/home']">Home</a>
-        <a [routerLink]="['/agenda']">Agenda</a>
-        <a [routerLink]="['/feed']">Feed</a>
         <a [routerLink]="['/perfil']">Perfil (Tatuador)</a>
 
-        <a [routerLink]="['/cliente/login']" class="client-login-button">Login Cliente</a>
+        <a *ngIf="!isClientLoggedIn" [routerLink]="['/cliente/login']" class="client-login-button">
+            Login Cliente
+        </a>
+        
+        <a *ngIf="isClientLoggedIn" [routerLink]="['/cliente/perfil']">
+            Meu Perfil
+        </a>
+
     </nav>
 </header>
 

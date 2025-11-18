@@ -9,7 +9,7 @@ import {
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { environment } from '../../environments/environment.development';
+// REMOVA a importação do environment, não precisamos mais dela aqui.
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
@@ -19,17 +19,23 @@ export class JwtInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     
     const accessToken = this.authService.getAccessToken();
-    const apiUrl = environment.apiUrl;
-    const isApiUrl = request.url.startsWith(apiUrl);
 
-    // CORREÇÃO: Exclui endpoints de autenticação da adição automática de token
-    const isAuthEndpoint = request.url.includes('/login/') || request.url.includes('/register/');
+    // --- LÓGICA CORRIGIDA ---
 
-    // Só anexa o token se:
-    // 1. O token existir
-    // 2. A requisição for para a nossa API
-    // 3. NÃO for para um endpoint de autenticação (login/register)
-    if (accessToken && isApiUrl && !isAuthEndpoint) {
+    // 1. Verifica se é uma requisição para qualquer API do backend (que o proxy irá capturar)
+    const isApiRequest = request.url.includes('/api/tattoo/') || request.url.includes('/api/tatuagem/');
+
+    // 2. Verifica se é um endpoint de autenticação (Tatuador OU Cliente)
+    //    Estes NUNCA devem receber o token.
+    const isAuthEndpoint = request.url.includes('/login/') || 
+                           request.url.includes('/register/') ||
+                           request.url.includes('/client/register/'); // Adicionado para garantir
+
+    // 3. Anexa o token se:
+    //    - O token existir E
+    //    - For uma requisição para a API E
+    //    - NÃO for um endpoint de autenticação
+    if (accessToken && isApiRequest && !isAuthEndpoint) {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${accessToken}`

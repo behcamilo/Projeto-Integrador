@@ -10,7 +10,11 @@ import { environment } from '../../environments/environment.development';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = environment.apiUrl;
+  // apiUrl (Relativa) -> /api/tattoo
+  private apiUrl = environment.apiUrl; 
+  // 1. URL para o app 'tatuagem' (posts, estilos, agenda)
+  private tatuagemApiUrl = this.apiUrl.replace('/tattoo', '/tatuagem'); 
+  
   private tokenKey = 'access_token';
   private refreshKey = 'refresh_token';
 
@@ -52,6 +56,18 @@ export class AuthService {
   getTattooArtistProfiles(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/profiles/`); 
   }
+  
+  // --- 2. [NOVO] Buscar todos os posts ---
+  getPosts(): Observable<any[]> {
+    // GET /api/tatuagem/posts/
+    return this.http.get<any[]>(`${this.tatuagemApiUrl}/posts/`);
+  }
+
+  // --- 3. [NOVO] Buscar lista de estilos ---
+  getEstilos(): Observable<any[]> {
+    // GET /api/tatuagem/estilos/
+    return this.http.get<any[]>(`${this.tatuagemApiUrl}/estilos/`);
+  }
 
   // --- 1. ENVIAR FOTO DE PERFIL (PATCH) ---
   updateProfilePicture(imageFile: File): Observable<any> {
@@ -63,7 +79,7 @@ export class AuthService {
     return this.http.patch(`${this.apiUrl}/me/`, formData); 
   }
 
-  // --- 2. POSTAR NOVA TATUAGEM (POST) ---
+  // --- 4. [CORREÇÃO DE URL] POSTAR NOVA TATUAGEM (POST) ---
   postTattooImage(postData: { descricao: string, tamanho: string, preco: number, estilo_id?: number }, imageFile: File): Observable<any> {
     const formData = new FormData();
     
@@ -79,7 +95,8 @@ export class AuthService {
         formData.append('estilo_id', postData.estilo_id.toString());
     }
     
-    // POST para o endpoint de criação de posts (Assumindo que o /api/tatuagem/posts/ está em environment.apiUrl/posts/)
-    return this.http.post(`${this.apiUrl}/posts/`, formData); 
+    // CORREÇÃO: Usar a tatuagemApiUrl
+    // POST /api/tatuagem/posts/
+    return this.http.post(`${this.tatuagemApiUrl}/posts/`, formData); 
   }
 }

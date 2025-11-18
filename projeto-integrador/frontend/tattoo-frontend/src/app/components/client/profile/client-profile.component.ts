@@ -1,8 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ClientService } from '../../../services/client.service'; // <-- CORREÇÃO: 3 níveis para o Service
-import { environment } from '../../../../environments/environment.development'; // 4 níveis para o Environment (Correto)
+import { ClientService } from '../../../services/client.service';
 
 @Component({
   selector: 'app-client-profile',
@@ -14,9 +13,15 @@ import { environment } from '../../../../environments/environment.development'; 
 export class ClientProfileComponent implements OnInit {
   clientService = inject(ClientService);
   router = inject(Router);
+  
   profile: any = null;
   clientId: number | null = null;
-  isLoading: boolean = true; 
+  isLoading: boolean = true;
+  
+  // Variáveis para upload
+  uploading: boolean = false;
+  uploadMessage: string | null = null;
+  @ViewChild('fileInput') fileInput: ElementRef | undefined;
 
   ngOnInit(): void {
     const id = localStorage.getItem('client_id');
@@ -34,44 +39,62 @@ export class ClientProfileComponent implements OnInit {
       return;
     }
     
-    // TS2571 - Corrigido pelo uso de tipagem explícita abaixo
     this.clientService.getProfile(this.clientId).subscribe({
-      next: (data: any) => { // <-- CORREÇÃO TS7006: data: any
+      next: (data: any) => {
         this.profile = data;
         this.isLoading = false;
       },
-      error: (err: any) => { // <-- CORREÇÃO TS7006: err: any
+      error: (err: any) => {
         console.error('Erro ao carregar perfil do cliente:', err);
         this.logout();
         this.isLoading = false;
       }
     });
   }
+
+  // --- Lógica de Upload de Foto ---
   
-  // Método de construção de URL para resolver imagens
-  getProfileImageUrl(path: string | null): string {
-    if (path && path.startsWith('http')) {
-        return path; 
-    }
-    if (path) {
-        const baseUrl = environment.apiUrl.replace('/api/tattoo', '');
-        return `${baseUrl}${path}`;
-    }
-    return 'assets/default-profile.png'; 
+  triggerFileInputClick(): void {
+    this.fileInput?.nativeElement.click();
   }
 
-  // Função handleLike que o template espera
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file && this.clientId) {
+      this.uploading = true;
+      this.uploadMessage = 'Enviando imagem...';
+
+      this.clientService.updateAvatar(this.clientId, file).subscribe({
+        next: (updatedProfile) => {
+          this.profile = updatedProfile; // Atualiza o perfil na tela
+          this.uploading = false;
+          this.uploadMessage = 'Foto atualizada com sucesso!';
+          setTimeout(() => this.uploadMessage = null, 3000);
+        },
+        error: (err) => {
+          console.error('Erro no upload:', err);
+          this.uploading = false;
+          this.uploadMessage = 'Erro ao enviar imagem.';
+          setTimeout(() => this.uploadMessage = null, 3000);
+        }
+      });
+    }
+  }
+
+  // --- Lógica de Favoritos ---
+
   handleLike(postId: number): void {
       if (!this.clientId) return;
 
-      // TS2571 - Corrigido pelo uso de tipagem explícita abaixo
       this.clientService.likePost(postId, this.clientId).subscribe({
-          next: (response: any) => { // <-- CORREÇÃO TS7006: response: any
-              console.log('Post descurtido/removido dos favoritos:', response);
-              // Recarrega o perfil para atualizar a lista de favoritos
-              this.fetchClientProfile();
+          next: (response: any) => {
+              console.log('Post descurtido:', response);
+              // Remove o post da lista localmente para atualizar a tela instantaneamente
+              if (this.profile && this.profile.posts_curtidos) {
+                  this.profile.posts_curtidos = this.profile.posts_curtidos.filter((p: any) => p.id !== postId);
+              }
           },
-          error: (err: any) => { // <-- CORREÇÃO TS7006: err: any
+          error: (err: any) => {
               console.error('Falha ao remover favorito:', err);
           }
       });

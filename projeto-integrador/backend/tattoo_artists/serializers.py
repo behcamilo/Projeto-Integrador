@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from tatuagem.serializers import TatuagemPostSerializer # Importação de outro app
 
 TattooArtist = get_user_model()
 
@@ -22,11 +23,34 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    username = serializers.CharField()
     password = serializers.CharField()
 
 class UserSerializer(serializers.ModelSerializer):
+    
+    posts = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField()
+
     class Meta:
         model = TattooArtist
-        # CORREÇÃO: Adiciona 'profile_picture'
-        fields = ('id', 'username', 'email', 'studio_name', 'bio', 'profile_picture')
+        fields = ('id', 'username', 'email', 'studio_name', 'bio', 'profile_picture', 'profile_picture_url', 'posts')
+
+    def get_profile_picture_url(self, obj):
+        # [ALTERADO] Removido build_absolute_uri.
+        if obj.profile_picture and hasattr(obj.profile_picture, 'url'):
+            return obj.profile_picture.url
+        return None
+
+    def get_posts(self, obj):
+        """
+        Serializa manualmente os posts do tatuador (obj),
+        passando o 'request' do context principal para o serializer aninhado.
+        """
+        request = self.context.get('request')
+        posts = obj.posts.all().order_by('-data_criacao') 
+        
+        return TatuagemPostSerializer(
+            posts, 
+            many=True, 
+            context={'request': request}
+        ).data

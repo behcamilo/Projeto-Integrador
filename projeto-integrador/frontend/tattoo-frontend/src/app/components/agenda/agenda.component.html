@@ -1,6 +1,5 @@
 <div class="booking-container">
     <div class="calendar-panel">
-
         <header class="calendar-header">
             <button (click)="changeMonth(-1)" class="nav-button">&#10094;</button>
             <h4 class="current-month">{{ currentMonthYear | titlecase }}</h4>
@@ -19,7 +18,6 @@
 
         <div class="days-grid">
             <ng-container *ngFor="let day of daysOfMonth">
-
                 <button
                     *ngIf="day; else emptyCell"
                     class="day-cell"
@@ -29,13 +27,11 @@
                 >
                     {{ day.getDate() }}
                 </button>
-
                 <ng-template #emptyCell>
                     <span class="day-cell empty"></span>
                 </ng-template>
             </ng-container>
         </div>
-
     </div>
 
     <div class="hours-panel">
@@ -54,7 +50,8 @@
                     [ngClass]="horario.status"
                     (click)="agendarHorario(horario)"
                 >
-                    {{ horario.time }}
+                    <span>{{ horario.time }}</span>
+                    <span *ngIf="horario.nome_usuario" class="booked-user">{{ horario.nome_usuario }}</span>
                 </button>
             </ng-container>
 
@@ -65,7 +62,7 @@
 
         <div class="schedule-legend">
             <span><i class="legend-dot disponivel"></i> Disponível</span>
-            <span><i class="legend-dot reservado"></i> Reserva Prévia</span>
+            <span><i class="legend-dot reservado"></i> Solicitação</span>
             <span><i class="legend-dot ocupado"></i> Ocupado</span>
         </div>
     </div>
@@ -75,46 +72,64 @@
 <div class="booking-modal-overlay" *ngIf="showBookingForm">
     <div class="booking-modal">
         <header class="modal-header">
-            <h4>Agendar Horário: {{ selectedHorario?.time }}</h4>
+            <h4>
+                Agendar: {{ selectedHorario?.time }}
+                <span *ngIf="selectedHorario?.status === 'reservado'">(Solicitação)</span>
+            </h4>
             <button class="close-button" (click)="closeBookingForm()">×</button>
         </header>
 
-        <form [formGroup]="bookingForm" (ngSubmit)="onSubmitBooking()">
-            <div class="form-group">
-                <label for="userName">Nome do Usuário:</label>
-                <input
-                    id="userName"
-                    type="text"
-                    formControlName="userName"
-                    placeholder="Digite o nome do usuário"
-                    required
-                >
-                <div *ngIf="bookingForm.get('userName')?.invalid && bookingForm.get('userName')?.touched" class="error-message">
-                    O nome do usuário é obrigatório.
+        <div *ngIf="isOwner && selectedHorario?.status === 'reservado'; else normalForm">
+            <p style="margin-bottom: 20px; color: #ccc;">
+                O cliente <strong>{{ selectedHorario?.nome_usuario }}</strong> solicitou este horário.
+                Deseja confirmar?
+            </p>
+            <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                <button class="confirm-button" (click)="responderSolicitacao(true)" style="background-color: #4CAF50;">
+                    Confirmar (Ocupar)
+                </button>
+                <button class="cancel-button" (click)="responderSolicitacao(false)" style="background-color: #F44336;">
+                    Recusar (Liberar)
+                </button>
+            </div>
+        </div>
+
+        <ng-template #normalForm>
+            <form [formGroup]="bookingForm" (ngSubmit)="onSubmitBooking()">
+                <div class="form-group">
+                    <label for="userName">Nome do Usuário:</label>
+                    <input
+                        id="userName"
+                        type="text"
+                        formControlName="userName"
+                        placeholder="Digite o nome do usuário"
+                        required
+                    >
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="reservationType">Mudar Status para:</label>
-                <select id="reservationType" formControlName="reservationType" required>
-                    <option value="disponivel">Disponivel</option>
-                    <option value="reservado">Reserva Prévia</option>
-                    <option value="ocupado">Ocupado</option>
-                </select>
-            </div>
+                <div class="form-group" *ngIf="isOwner">
+                    <label for="reservationType">Status:</label>
+                    <select id="reservationType" formControlName="reservationType">
+                        <option value="disponivel">Disponível</option>
+                        <option value="reservado">Reserva (Amarelo)</option>
+                        <option value="ocupado">Ocupado (Vermelho)</option>
+                    </select>
+                </div>
 
-            <div class="modal-actions">
-                <button
-                    type="submit"
-                    [disabled]="bookingForm.invalid"
-                    class="confirm-button"
-                >
-                    Confirmar Agendamento
-                </button>
-                <button type="button" (click)="closeBookingForm()" class="cancel-button">
-                    Cancelar
-                </button>
-            </div>
-        </form>
+                <div class="modal-actions">
+                    <button
+                        type="submit"
+                        [disabled]="bookingForm.invalid"
+                        class="confirm-button"
+                    >
+                        Salvar
+                    </button>
+                    <button type="button" (click)="closeBookingForm()" class="cancel-button">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </ng-template>
+
     </div>
 </div>

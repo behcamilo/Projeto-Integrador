@@ -46,6 +46,11 @@ class Agenda(models.Model):
     # Referencia o modelo TattooArtist
     tatuador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="agendas")
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name="agendamentos")
+    
+    # *** CAMPO ADICIONADO ***
+    # Armazena o nome do cliente (seja ele logado ou não) que o frontend envia
+    nome_usuario = models.CharField(max_length=255, null=True, blank=True) 
+    
     data = models.DateField()
     hora_inicio = models.TimeField()
     duracao_minutos = models.PositiveIntegerField(default=60)
