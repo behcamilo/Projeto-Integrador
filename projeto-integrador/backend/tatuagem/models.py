@@ -33,40 +33,6 @@ class Cliente(models.Model):
     def __str__(self):
         return self.nome
 
-
-# Agenda do tatuador
-class Agenda(models.Model):
-    STATUS_CHOICES = [
-        ('disponivel', 'Disponível'),
-        ('pendente', 'Pendente'),        
-        ('reservado', 'Reservado'),      
-        ('indisponivel', 'Indisponível'),
-    ]
-
-    # Referencia o modelo TattooArtist
-    tatuador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="agendas")
-    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name="agendamentos")
-    
-    # *** CAMPO ADICIONADO ***
-    # Armazena o nome do cliente (seja ele logado ou não) que o frontend envia
-    nome_usuario = models.CharField(max_length=255, null=True, blank=True) 
-    
-    data = models.DateField()
-    hora_inicio = models.TimeField()
-    duracao_minutos = models.PositiveIntegerField(default=60)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='disponivel')
-    criado_em = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        # evita duplicidade exata de horários para o mesmo tatuador
-        constraints = [
-            models.UniqueConstraint(fields=['tatuador', 'data', 'hora_inicio'], name='unique_horario_tatuador')
-        ]
-
-    def __str__(self):
-        return f"{self.data} {self.hora_inicio} - {self.tatuador} ({self.get_status_display()})"
-
-
 # Modelo para Postagens de Tatuagem (Feed)
 class TatuagemPost(models.Model):
     tatuador = models.ForeignKey(
@@ -88,3 +54,37 @@ class TatuagemPost(models.Model):
 
     def __str__(self):
         return f"Post de {self.tatuador.username} - {self.data_criacao}"
+
+# Agenda do tatuador
+class Agenda(models.Model):
+    STATUS_CHOICES = [
+        ('disponivel', 'Disponível'),
+        ('pendente', 'Pendente'),        
+        ('reservado', 'Reservado'),      
+        ('indisponivel', 'Indisponível'),
+    ]
+
+    # Referencia o modelo TattooArtist
+    tatuador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="agendas")
+    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name="agendamentos")
+    tatuagem = models.ForeignKey(TatuagemPost, on_delete=models.SET_NULL, null=True, blank=True, related_name="tatuagem")
+    
+    # *** CAMPO ADICIONADO ***
+    # Armazena o nome do cliente (seja ele logado ou não) que o frontend envia
+    nome_usuario = models.CharField(max_length=255, null=True, blank=True) 
+    
+    data = models.DateField()
+    hora_inicio = models.TimeField()
+    duracao_minutos = models.PositiveIntegerField(default=60)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='disponivel')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # evita duplicidade exata de horários para o mesmo tatuador
+        constraints = [
+            models.UniqueConstraint(fields=['tatuador', 'data', 'hora_inicio'], name='unique_horario_tatuador')
+        ]
+
+    def __str__(self):
+        return f"{self.data} {self.hora_inicio} - {self.tatuador} ({self.get_status_display()})"
+
