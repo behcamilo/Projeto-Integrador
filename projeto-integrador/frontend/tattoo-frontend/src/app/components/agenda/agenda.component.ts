@@ -14,7 +14,7 @@ import { AgendamentoService } from '../../services/agenda.service';
 export class AgendaComponent implements OnInit {
 
   @Input() artistId: number | null = null;
-  @Input() isOwner: boolean = false; 
+  @Input() isOwner: boolean = false;
 
   currentDate = new Date();
   selectedDate!: Date;
@@ -30,9 +30,9 @@ export class AgendaComponent implements OnInit {
   ngOnInit(): void {
     if (!this.artistId) {
         console.warn("AgendaComponent: artistId é necessário para carregar.");
-        return; 
+        return;
     }
-    
+
     this.generateCalendarDays(this.currentDate.getFullYear(), this.currentDate.getMonth());
     const today = new Date();
     this.selectDay(today);
@@ -86,7 +86,7 @@ export class AgendaComponent implements OnInit {
   }
 
   private loadHorariosDoBackend(date: Date): void {
-      if (!this.artistId) return; 
+      if (!this.artistId) return;
 
       const dateStr = this.formatDate(date);
       const slotsBase = this.getSlotsBase(date);
@@ -99,15 +99,15 @@ export class AgendaComponent implements OnInit {
                       agendamentosMap.set(h.time, h);
                   }
               });
-              
+
               this.horariosDisponiveis = slotsBase.map(slot => {
                   const found = agendamentosMap.get(slot.time);
                   if (found) {
                       // [IMPORTANTE] Garante que o data_hora esteja presente para edições futuras
-                      found.data_hora = slot.data_hora; 
-                      
+                      found.data_hora = slot.data_hora;
+
                       if (found.status === 'indisponivel') {
-                          found.status = 'ocupado'; 
+                          found.status = 'ocupado';
                       }
                       return found;
                   }
@@ -124,7 +124,7 @@ export class AgendaComponent implements OnInit {
   selectDay(date: Date | null): void {
     if (!date) return;
     this.selectedDate = date;
-    this.loadHorariosDoBackend(date); 
+    this.loadHorariosDoBackend(date);
   }
 
   formatDate(date: Date): string {
@@ -175,26 +175,26 @@ export class AgendaComponent implements OnInit {
   responderSolicitacao(aceitar: boolean): void {
       if (!this.selectedHorario || !this.artistId) return;
 
-      const novoStatus = aceitar ? 'indisponivel' : 'disponivel'; 
+      const novoStatus = aceitar ? 'indisponivel' : 'disponivel';
       const novoNomeUsuario = aceitar ? this.selectedHorario.nome_usuario : '';
 
       const dataToSave: Horario = {
           id: this.selectedHorario.id,
           nome_usuario: novoNomeUsuario,
-          status: novoStatus as any, 
+          status: novoStatus as any,
           data_hora: this.selectedHorario.data_hora,
           time: this.selectedHorario.time
       };
 
       // [CORREÇÃO] Passa opções para controlar o client_id
-      const options = aceitar 
+      const options = aceitar
           ? { skipClientAuth: true } // Aceitar: Mantém o cliente atual
           : { clearClient: true };   // Recusar: Limpa o cliente
 
       this.agendamentoService.saveAgendamento(this.artistId, dataToSave, options).subscribe({
           next: () => {
               alert(aceitar ? 'Agendamento confirmado!' : 'Agendamento recusado/cancelado.');
-              this.selectDay(this.selectedDate); 
+              this.selectDay(this.selectedDate);
               this.closeBookingForm();
           },
           error: (err) => {
@@ -214,7 +214,7 @@ export class AgendaComponent implements OnInit {
       const dataToSave: Horario = {
           id: this.selectedHorario.id,
           nome_usuario: userName,
-          status: statusBackend, 
+          status: statusBackend,
           data_hora: this.selectedHorario.data_hora,
           time: this.selectedHorario.time
       };
