@@ -5,7 +5,7 @@
 
         <div class="profile-picture-container">
             <img *ngIf="!isMyProfile" [src]="user.profile_picture_url || 'default-profile.png'" alt="Foto de Perfil" class="profile-picture">
-            
+
             <label *ngIf="isMyProfile" for="profile-upload">
                 <img [src]="user.profile_picture_url || 'default-profile.png'" alt="Foto de Perfil" class="profile-picture">
                 <div class="upload-overlay">
@@ -55,9 +55,9 @@
 
     </div>
 
-    <app-agenda 
-        *ngIf="artistId" 
-        [artistId]="artistId" 
+    <app-agenda
+        *ngIf="artistId"
+        [artistId]="artistId"
         [isOwner]="isMyProfile">
     </app-agenda>
 
@@ -65,7 +65,7 @@
     <div *ngIf="isMyProfile" class="new-post-form-card">
         <h3 class="section-title">Criar Nova Postagem</h3>
         <form [formGroup]="postForm" (ngSubmit)="onPostSubmit()">
-            
+
             <div class="form-group">
                 <textarea formControlName="descricao" placeholder="Descrição da tatuagem..."></textarea>
             </div>
@@ -99,9 +99,9 @@
                     accept="image/*"
                     style="display: none;"
                 >
-                <button 
-                    type="button" 
-                    class="upload-button-action" 
+                <button
+                    type="button"
+                    class="upload-button-action"
                     (click)="triggerPostFileInputClick()">
                     {{ postFile ? postFile.name : 'Selecionar Imagem' }}
                 </button>
@@ -123,7 +123,7 @@
 
     <div class="posts-grid">
         <div *ngFor="let post of user?.posts" class="tattoo-post-card">
-            
+
             <div class="post-image-placeholder">
                 <img [src]="post.imagem_url || 'default-profile.png'" alt="{{ post.descricao }}" class="post-image">
             </div>
@@ -136,7 +136,7 @@
                 </div>
             </div>
         </div>
-        
+
         <p *ngIf="!user?.posts || user?.posts.length === 0" class="no-posts-message">
             Você ainda não fez nenhuma postagem.
         </p>

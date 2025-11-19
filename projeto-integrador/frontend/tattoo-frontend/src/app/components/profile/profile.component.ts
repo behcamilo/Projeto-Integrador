@@ -31,13 +31,21 @@ export class ProfileComponent implements OnInit {
   artistId: number | null = null;
 
   @ViewChild('fileInput') fileInput: ElementRef | undefined;
-  
+
   // 4. Variáveis para o formulário de postagem
   postForm: FormGroup;
   postFile: File | null = null;
   @ViewChild('postFileInput') postFileInput: ElementRef | undefined;
   postSubmissionError: string | null = null;
-  estilos: any[] = []; // Para o dropdown
+  //estilos: any[] = []; // Para o dropdown
+  public estilos: any[] = [
+  { nome: 'Old School' },
+  { nome: 'New School' },
+  { nome: 'Realismo' },
+  { nome: 'Blackwork' },
+  { nome: 'Pontilhismo' },
+];
+
 
   constructor() {
     // 5. Inicializar o formulário de postagem
@@ -45,7 +53,7 @@ export class ProfileComponent implements OnInit {
       descricao: [''],
       tamanho: [''],
       preco: [0, Validators.min(0)],
-      estilo_id: [null],
+      estilo_id: [null, Validators.required],
       imagem: [null, Validators.required] // Validador para o arquivo
     });
   }
@@ -53,7 +61,7 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
-      
+
       if (idParam) {
         // É um perfil público (ex: /artista/5)
         this.isMyProfile = false;
@@ -144,7 +152,7 @@ export class ProfileComponent implements OnInit {
       });
     }
   }
-  
+
   // 8. [NOVO] Lógica para o formulário de NOVO POST
   triggerPostFileInputClick(): void {
     this.postFileInput?.nativeElement.click();
@@ -155,7 +163,7 @@ export class ProfileComponent implements OnInit {
     if (file) {
       this.postFile = file;
       // Atualiza o valor do form para passar na validação
-      this.postForm.patchValue({ imagem: file }); 
+      this.postForm.patchValue({ imagem: file });
       this.postSubmissionError = null;
     }
   }
@@ -166,7 +174,7 @@ export class ProfileComponent implements OnInit {
       this.postForm.markAllAsTouched();
       return;
     }
-    
+
     if (this.postForm.invalid) {
        this.postSubmissionError = 'Preencha os campos obrigatórios.';
        return;
@@ -183,7 +191,7 @@ export class ProfileComponent implements OnInit {
             this.user.posts = [];
         }
         this.user.posts.unshift(newPost);
-        
+
         // Limpa o formulário
         this.postForm.reset({ preco: 0, estilo_id: null });
         this.postFile = null;
