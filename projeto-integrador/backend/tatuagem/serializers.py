@@ -88,10 +88,20 @@ class AgendaSerializer(serializers.ModelSerializer):
     time = serializers.TimeField(source='hora_inicio', format='%H:%M', read_only=True)
     data_hora = serializers.DateTimeField(write_only=True)
     client_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
+    tatuagem = TatuagemPostSerializer(read_only=True)
+    tatuagem_id = serializers.PrimaryKeyRelatedField(
+        queryset=TatuagemPost.objects.all(),
+        source="tatuagem",
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+
 
     class Meta:
         model = Agenda
-        fields = ('id', 'time', 'status', 'nome_usuario', 'data_hora', 'client_id')
+        fields = ('id', 'time', 'status', 'nome_usuario', 'data_hora', 'client_id', 'tatuagem', 'tatuagem_id')
 
     def create(self, validated_data):
         data_hora = validated_data.pop('data_hora')
@@ -105,6 +115,9 @@ class AgendaSerializer(serializers.ModelSerializer):
                 validated_data['cliente'] = Cliente.objects.get(id=client_id)
             except Cliente.DoesNotExist:
                 pass 
+
+        if 'tatuagem' in validated_data:
+            validated_data['tatuagem'] = validated_data['tatuagem']
         
         return super().create(validated_data)
 
@@ -126,7 +139,10 @@ class AgendaSerializer(serializers.ModelSerializer):
                     instance.cliente = Cliente.objects.get(id=client_id)
                 except Cliente.DoesNotExist:
                     instance.cliente = None
-        
+
+        if 'tatuagem' in validated_data:
+            instance.tatuagem = validated_data['tatuagem']
+
         instance.status = validated_data.get('status', instance.status)
         instance.nome_usuario = validated_data.get('nome_usuario', instance.nome_usuario)
         instance.save()
