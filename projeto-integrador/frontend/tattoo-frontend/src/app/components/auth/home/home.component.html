@@ -41,7 +41,7 @@
             <div class="card-details">
                 <p class="post-description">{{ post.descricao || 'Sem descrição' }}</p>
                 <div class="detail-row">
-                    <span>{{ post.estilo?.nome || 'N/A' }}</span>
+                    <span>{{ post.estilo || 'N/A' }}</span>
                     <span>{{ post.tempo_estimado ? post.tempo_estimado + ' min' : '' }}</span>
                 </div>
                 <div class="detail-row">

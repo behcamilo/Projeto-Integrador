@@ -31,7 +31,8 @@ export class ProfileComponent implements OnInit {
   postFile: File | null = null;
   @ViewChild('postFileInput') postFileInput: ElementRef | undefined;
   postSubmissionError: string | null = null;
-  estilos: any[] = []; 
+  
+  // [REMOVIDO] estilos: any[] = []; 
 
   preSelectedTattooId: number | null = null;
   preSelectedDuration: number | null = null;
@@ -41,9 +42,9 @@ export class ProfileComponent implements OnInit {
       descricao: [''],
       tamanho: [''],
       preco: [0, Validators.min(0)],
-      // [CORREÇÃO] Nome do campo: tempo_estimado
       tempo_estimado: [60, [Validators.required, Validators.min(30)]], 
-      estilo_id: [null],
+      // [ALTERADO] Estilo agora é string
+      estilo: [''],
       imagem: [null, Validators.required] 
     });
   }
@@ -75,18 +76,7 @@ export class ProfileComponent implements OnInit {
           return;
         }
         this.fetchMyUserProfile();
-        this.loadEstilos(); 
-      }
-    });
-  }
-
-  loadEstilos(): void {
-    this.authService.getEstilos().subscribe({
-      next: (data) => {
-        this.estilos = data;
-      },
-      error: (err) => {
-        console.error('Erro ao carregar estilos', err);
+        // [REMOVIDO] this.loadEstilos(); 
       }
     });
   }
@@ -184,7 +174,8 @@ export class ProfileComponent implements OnInit {
         }
         this.user.posts.unshift(newPost);
         
-        this.postForm.reset({ preco: 0, estilo_id: null, tempo_estimado: 60 });
+        // Reset atualizado
+        this.postForm.reset({ preco: 0, estilo: '', tempo_estimado: 60 });
         this.postFile = null;
         if (this.postFileInput) {
           this.postFileInput.nativeElement.value = '';

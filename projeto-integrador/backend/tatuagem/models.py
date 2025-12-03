@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 
-# Tabela para armazenar os estilos de tatuagem
+# Tabela para armazenar os estilos de tatuagem (Pode ser mantida para legado ou removida se não houver outros usos)
 class Estilo(models.Model):
     nome = models.CharField(max_length=50)
 
@@ -42,12 +42,14 @@ class TatuagemPost(models.Model):
     )
     
     descricao = models.TextField(blank=True, null=True)
-    estilo = models.ForeignKey(Estilo, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # [ALTERADO] Agora é um texto livre, não mais uma ForeignKey
+    estilo = models.CharField(max_length=100, blank=True, null=True)
+    
     data_criacao = models.DateTimeField(auto_now_add=True)
     tamanho = models.CharField(max_length=50, blank=True, null=True)
     preco = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     
-    # [CORREÇÃO] Renomeado para bater com o seu banco de dados
     tempo_estimado = models.PositiveIntegerField(default=60, help_text="Tempo estimado em minutos")
 
     def __str__(self):

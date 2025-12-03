@@ -57,9 +57,9 @@ class TatuagemPostListCreateView(generics.ListCreateAPIView):
     serializer_class = TatuagemPostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
     
-    # Adicionado suporte a busca
     filter_backends = [filters.SearchFilter]
-    search_fields = ['descricao', 'estilo__nome', 'tatuador__username', 'tatuador__studio_name']
+    # [ALTERADO] 'estilo' agora é texto direto, não mais chave estrangeira
+    search_fields = ['descricao', 'estilo', 'tatuador__username', 'tatuador__studio_name']
 
     def perform_create(self, serializer):
         serializer.save(tatuador=self.request.user)

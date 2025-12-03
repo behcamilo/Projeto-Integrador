@@ -87,12 +87,12 @@
                 </div>
                 <div class="form-group">
                     <label for="estilo">Estilo:</label>
-                    <select id="estilo" formControlName="estilo_id">
-                        <option [ngValue]="null" disabled>Selecione um estilo</option>
-                        <option *ngFor="let estilo of estilos" [ngValue]="estilo.id">
-                            {{ estilo.nome }}
-                        </option>
-                    </select>
+                    <input 
+                        id="estilo" 
+                        type="text" 
+                        formControlName="estilo" 
+                        placeholder="Ex: Realismo, Old School..."
+                    >
                 </div>
             </div>
 
@@ -137,7 +137,7 @@
             <div class="post-details">
                 <p class="post-description">{{ post.descricao || 'Sem descrição' }}</p>
                 <div class="detail-row">
-                    <span>{{ post.estilo?.nome || 'N/A' }}</span>
+                    <span>{{ post.estilo || 'N/A' }}</span>
                     <span>{{ post.tempo_estimado ? post.tempo_estimado + ' min' : '' }}</span>
                 </div>
             </div>

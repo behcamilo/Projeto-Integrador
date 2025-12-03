@@ -55,7 +55,8 @@
 
                 <div class="post-details">
                     <p>Artista: <strong>{{ post.tatuador }}</strong></p>
-                    <p class="post-description">Estilo: {{ post.estilo?.nome || 'N/A' }}</p>
+                    
+                    <p class="post-description">Estilo: {{ post.estilo || 'N/A' }}</p>
                 </div>
 
                 <div class="card-actions">

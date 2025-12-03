@@ -13,10 +13,8 @@ class TatuagemPostSerializer(serializers.ModelSerializer):
     tatuador_id = serializers.ReadOnlyField(source='tatuador.id')
     tatuador_avatar_url = serializers.SerializerMethodField()
     
-    estilo = EstiloSerializer(read_only=True)
-    estilo_id = serializers.PrimaryKeyRelatedField(
-        queryset=Estilo.objects.all(), source='estilo', write_only=True, required=False
-    )
+    # [ALTERADO] Removido EstiloSerializer e estilo_id. Estilo agora é string simples.
+    
     imagem_url = serializers.SerializerMethodField()
     total_curtidas = serializers.SerializerMethodField() 
     curtido = serializers.SerializerMethodField()
@@ -25,9 +23,10 @@ class TatuagemPostSerializer(serializers.ModelSerializer):
         model = TatuagemPost
         fields = (
             'id', 'tatuador', 'tatuador_id', 'tatuador_avatar_url', 
-            'imagem', 'imagem_url', 'descricao', 'estilo', 'estilo_id', 
+            'imagem', 'imagem_url', 'descricao', 
+            'estilo', # Campo de texto
             'tamanho', 'preco', 'data_criacao', 'curtido', 'total_curtidas',
-            'tempo_estimado' # [CORREÇÃO]
+            'tempo_estimado'
         )
         read_only_fields = ('tatuador',)
 
@@ -45,6 +44,9 @@ class TatuagemPostSerializer(serializers.ModelSerializer):
         return obj.curtido_por.count()
 
     def get_curtido(self, obj):
+        # A lógica real de "curtido" depende do request user (cliente), 
+        # que geralmente é tratado na View ou aqui se tiver request no context.
+        # Por simplificação, retornamos False ou implementamos a checagem se necessário.
         return False
 
 class ClientRegisterSerializer(serializers.ModelSerializer):

@@ -49,7 +49,6 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/me/`); 
   }
 
-  // Atualizado para aceitar busca
   getTattooArtistProfiles(search?: string): Observable<any[]> {
     let params = new HttpParams();
     if (search) {
@@ -58,7 +57,6 @@ export class AuthService {
     return this.http.get<any[]>(`${this.apiUrl}/profiles/`, { params }); 
   }
   
-  // Atualizado para aceitar busca
   getPosts(search?: string): Observable<any[]> {
     let params = new HttpParams();
     if (search) {
@@ -77,7 +75,8 @@ export class AuthService {
     return this.http.patch(`${this.apiUrl}/me/`, formData); 
   }
 
-  postTattooImage(postData: { descricao: string, tamanho: string, preco: number, estilo_id?: number, tempo_estimado: number }, imageFile: File): Observable<any> {
+  // [CORREÇÃO] Atualizado para aceitar estilo como string
+  postTattooImage(postData: { descricao: string, tamanho: string, preco: number, estilo?: string, tempo_estimado: number }, imageFile: File): Observable<any> {
     const formData = new FormData();
     
     formData.append('imagem', imageFile, imageFile.name);
@@ -86,8 +85,8 @@ export class AuthService {
     formData.append('preco', postData.preco.toString());
     formData.append('tempo_estimado', postData.tempo_estimado.toString());
     
-    if (postData.estilo_id) {
-        formData.append('estilo_id', postData.estilo_id.toString());
+    if (postData.estilo) {
+        formData.append('estilo', postData.estilo);
     }
     
     return this.http.post(`${this.tatuagemApiUrl}/posts/`, formData); 
