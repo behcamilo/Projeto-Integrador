@@ -1,7 +1,5 @@
-// frontend/tattoo-frontend/src/app/services/auth.service.ts
-
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment.development';
@@ -10,9 +8,7 @@ import { environment } from '../../environments/environment.development';
   providedIn: 'root'
 })
 export class AuthService {
-  // apiUrl (Relativa) -> /api/tattoo
   private apiUrl = environment.apiUrl; 
-  // 1. URL para o app 'tatuagem' (posts, estilos, agenda)
   private tatuagemApiUrl = this.apiUrl.replace('/tattoo', '/tatuagem'); 
   
   private tokenKey = 'access_token';
@@ -53,50 +49,47 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/me/`); 
   }
 
-  getTattooArtistProfiles(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/profiles/`); 
+  // Atualizado para aceitar busca
+  getTattooArtistProfiles(search?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<any[]>(`${this.apiUrl}/profiles/`, { params }); 
   }
   
-  // --- 2. [NOVO] Buscar todos os posts ---
-  getPosts(): Observable<any[]> {
-    // GET /api/tatuagem/posts/
-    return this.http.get<any[]>(`${this.tatuagemApiUrl}/posts/`);
+  // Atualizado para aceitar busca
+  getPosts(search?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<any[]>(`${this.tatuagemApiUrl}/posts/`, { params });
   }
 
-  // --- 3. [NOVO] Buscar lista de estilos ---
   getEstilos(): Observable<any[]> {
-    // GET /api/tatuagem/estilos/
     return this.http.get<any[]>(`${this.tatuagemApiUrl}/estilos/`);
   }
 
-  // --- 1. ENVIAR FOTO DE PERFIL (PATCH) ---
   updateProfilePicture(imageFile: File): Observable<any> {
     const formData = new FormData();
-    // O nome do campo deve ser 'profile_picture'
     formData.append('profile_picture', imageFile, imageFile.name);
-
-    // PATCH para o endpoint /me/ (o token é adicionado pelo Interceptor)
     return this.http.patch(`${this.apiUrl}/me/`, formData); 
   }
 
-  // --- 4. [CORREÇÃO DE URL] POSTAR NOVA TATUAGEM (POST) ---
-  postTattooImage(postData: { descricao: string, tamanho: string, preco: number, estilo_id?: number }, imageFile: File): Observable<any> {
+  postTattooImage(postData: { descricao: string, tamanho: string, preco: number, estilo_id?: number, tempo_estimado: number }, imageFile: File): Observable<any> {
     const formData = new FormData();
     
-    // O nome do campo deve ser 'imagem'
     formData.append('imagem', imageFile, imageFile.name);
-    
-    // Anexar outros dados do formulário
     formData.append('descricao', postData.descricao);
     formData.append('tamanho', postData.tamanho);
     formData.append('preco', postData.preco.toString());
+    formData.append('tempo_estimado', postData.tempo_estimado.toString());
     
     if (postData.estilo_id) {
         formData.append('estilo_id', postData.estilo_id.toString());
     }
     
-    // CORREÇÃO: Usar a tatuagemApiUrl
-    // POST /api/tatuagem/posts/
     return this.http.post(`${this.tatuagemApiUrl}/posts/`, formData); 
   }
 }

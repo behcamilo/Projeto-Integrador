@@ -1,22 +1,29 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { ClientService } from '../../../services/client.service';
-import { Router } from '@angular/router'; // [CORREÇÃO] Removido RouterLink
+import { Router, RouterLink } from '@angular/router'; 
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule], // [CORREÇÃO] Removido RouterLink
+  imports: [CommonModule, FormsModule, RouterLink], 
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
   isLoggedIn: boolean = false;
   user: any; 
-  posts: any[] = []; 
   
-  // Controle do Cliente Logado
+  // Listas de dados
+  posts: any[] = []; 
+  artists: any[] = [];
+  
+  // Controle de Busca
+  searchType: 'posts' | 'artists' = 'posts';
+  searchTerm: string = '';
+  
   clientId: number | null = null;
   likedPostIds: Set<number> = new Set(); 
 
@@ -25,7 +32,6 @@ export class HomeComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
-    // 1. Verifica se é um Tatuador logado
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
         this.authService.getMe().subscribe({
@@ -37,7 +43,6 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    // 2. Verifica se é um Cliente logado
     const cId = localStorage.getItem('client_id');
     if (cId) {
         this.clientId = parseInt(cId, 10);
@@ -47,18 +52,35 @@ export class HomeComponent implements OnInit {
   }
 
   loadData(): void {
-    this.authService.getPosts().subscribe({
-      next: (postsData: any[]) => {
-        this.posts = postsData;
-        // Se houver um cliente logado, carregamos os likes dele
-        if (this.clientId) {
-            this.loadClientLikes();
-        }
-      },
-      error: (err: any) => {
-        console.error('Falha ao carregar posts:', err);
-      }
-    });
+    if (this.searchType === 'posts') {
+        this.authService.getPosts(this.searchTerm).subscribe({
+          next: (postsData: any[]) => {
+            this.posts = postsData;
+            this.artists = []; 
+            if (this.clientId) {
+                this.loadClientLikes();
+            }
+          },
+          error: (err: any) => console.error('Falha ao carregar posts:', err)
+        });
+    } else {
+        this.authService.getTattooArtistProfiles(this.searchTerm).subscribe({
+            next: (artistsData: any[]) => {
+                this.artists = artistsData;
+                this.posts = [];
+            },
+            error: (err: any) => console.error('Falha ao carregar artistas:', err)
+        });
+    }
+  }
+
+  onSearch(): void {
+      this.loadData();
+  }
+
+  onTypeChange(): void {
+      this.searchTerm = ''; 
+      this.loadData();
   }
 
   loadClientLikes(): void {
@@ -111,8 +133,14 @@ export class HomeComponent implements OnInit {
       });
   }
 
-  agendar(tatuadorId: number): void {
-      if (!tatuadorId) return;
-      this.router.navigate(['/artista', tatuadorId]);
+  agendar(post: any): void {
+      if (!post.tatuador_id) return;
+      
+      this.router.navigate(['/artista', post.tatuador_id], {
+          queryParams: {
+              tattoo: post.id,
+              duration: post.tempo_estimado || 60
+          }
+      });
   }
 }

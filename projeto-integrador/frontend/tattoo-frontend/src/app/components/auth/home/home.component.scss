@@ -14,6 +14,68 @@ $heart-color: #FF69B4;
     padding: 30px 5%;
 }
 
+// --- ESTILOS DA BARRA DE BUSCA (NOVO) ---
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.search-box {
+    display: flex;
+    background-color: $card-background;
+    border: 1px solid $card-border;
+    border-radius: 30px; 
+    overflow: hidden;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+
+    .search-select {
+        background-color: #333;
+        color: $text-color-light;
+        border: none;
+        padding: 10px 15px;
+        border-right: 1px solid $card-border;
+        cursor: pointer;
+        outline: none;
+        font-weight: bold;
+        
+        &:focus {
+            background-color: #444;
+        }
+    }
+
+    .search-input {
+        flex: 1;
+        background-color: transparent;
+        border: none;
+        color: $text-color-light;
+        padding: 10px 15px;
+        font-size: 1em;
+        outline: none;
+
+        &::placeholder {
+            color: rgba($text-color-light, 0.5);
+        }
+    }
+
+    .search-button {
+        background-color: $primary-red;
+        border: none;
+        color: white;
+        padding: 0 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            background-color: color.scale($primary-red, $lightness: -10%);
+        }
+    }
+}
+
 .page-title {
     color: $text-color-light;
     text-align: center;
@@ -168,5 +230,46 @@ $heart-color: #FF69B4;
         &:hover {
             background-color: color.scale($primary-red, $lightness: -10%); 
         }
+    }
+}
+
+// --- ESTILOS ESPECÍFICOS PARA CARD DE ARTISTA (NOVO) ---
+.artist-card {
+    .artist-header {
+        flex-direction: column;
+        text-align: center;
+        padding-bottom: 20px;
+        background-color: #2a2a2a; 
+        
+        .big-avatar {
+            width: 100px;
+            height: 100px;
+            margin: 0 0 15px 0;
+            border: 3px solid $primary-red;
+        }
+
+        .artist-info {
+            h3 { font-size: 1.4em; }
+            .studio-name { 
+                color: $primary-red; 
+                font-size: 0.9em; 
+                font-weight: bold; 
+                text-transform: uppercase;
+            }
+        }
+    }
+
+    .bio-text {
+        text-align: center;
+        font-style: italic;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; // Limita a 3 linhas
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .full-width {
+        width: 100%;
+        text-align: center;
     }
 }

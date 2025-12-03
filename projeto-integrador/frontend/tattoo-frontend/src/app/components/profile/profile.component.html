@@ -58,7 +58,9 @@
     <app-agenda 
         *ngIf="artistId" 
         [artistId]="artistId" 
-        [isOwner]="isMyProfile">
+        [isOwner]="isMyProfile"
+        [preSelectedTattooId]="preSelectedTattooId"
+        [preSelectedDuration]="preSelectedDuration">
     </app-agenda>
 
 
@@ -74,6 +76,10 @@
                 <div class="form-group">
                     <label for="tamanho">Tamanho (cm):</label>
                     <input id="tamanho" type="text" formControlName="tamanho" placeholder="Ex: 15x10">
+                </div>
+                <div class="form-group">
+                    <label for="tempo_estimado">Tempo Estimado (min):</label>
+                    <input id="tempo_estimado" type="number" formControlName="tempo_estimado" placeholder="60">
                 </div>
                 <div class="form-group">
                     <label for="preco">Preço (R$):</label>
@@ -132,7 +138,7 @@
                 <p class="post-description">{{ post.descricao || 'Sem descrição' }}</p>
                 <div class="detail-row">
                     <span>{{ post.estilo?.nome || 'N/A' }}</span>
-                    <span>{{ (post.preco > 0) ? ('R$ ' + post.preco) : 'A consultar' }}</span>
+                    <span>{{ post.tempo_estimado ? post.tempo_estimado + ' min' : '' }}</span>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
@@ -41,10 +41,8 @@ class ClientProfileView(APIView):
         serializer = ClientProfileSerializer(client, context={'request': request})
         return Response(serializer.data)
 
-    # ADICIONADO: Método PATCH para atualizar foto (e outros dados)
     def patch(self, request, client_id, *args, **kwargs):
         client = get_object_or_404(Cliente, pk=client_id)
-        # 'partial=True' permite enviar apenas o campo avatar
         serializer = ClientProfileSerializer(client, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -58,6 +56,10 @@ class TatuagemPostListCreateView(generics.ListCreateAPIView):
     queryset = TatuagemPost.objects.all().order_by('-data_criacao')
     serializer_class = TatuagemPostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
+    
+    # Adicionado suporte a busca
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['descricao', 'estilo__nome', 'tatuador__username', 'tatuador__studio_name']
 
     def perform_create(self, serializer):
         serializer.save(tatuador=self.request.user)

@@ -1,9 +1,32 @@
 <div class="main-content-container">
-    <div class="page-title">
-        <h2>Inspire-se com Posts Recentes</h2>
+    
+    <div class="search-container">
+        <div class="search-box">
+            <select [(ngModel)]="searchType" (change)="onTypeChange()" class="search-select">
+                <option value="posts">Tatuagens</option>
+                <option value="artists">Tatuadores</option>
+            </select>
+            
+            <input 
+                type="text" 
+                [(ngModel)]="searchTerm" 
+                (keyup.enter)="onSearch()"
+                [placeholder]="searchType === 'posts' ? 'Busque por estilo, descrição...' : 'Busque por nome, estúdio...'"
+                class="search-input"
+            >
+            
+            <button (click)="onSearch()" class="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
     </div>
 
-    <div class="profiles-grid">
+    <div class="page-title">
+        <h2 *ngIf="searchType === 'posts'">Inspire-se com Posts Recentes</h2>
+        <h2 *ngIf="searchType === 'artists'">Encontre seu Artista</h2>
+    </div>
+
+    <div class="profiles-grid" *ngIf="searchType === 'posts'">
         <div class="tattoo-card" *ngFor="let post of posts">
             
             <div class="card-header">
@@ -19,6 +42,9 @@
                 <p class="post-description">{{ post.descricao || 'Sem descrição' }}</p>
                 <div class="detail-row">
                     <span>{{ post.estilo?.nome || 'N/A' }}</span>
+                    <span>{{ post.tempo_estimado ? post.tempo_estimado + ' min' : '' }}</span>
+                </div>
+                <div class="detail-row">
                     <span>{{ (post.preco > 0) ? ('R$ ' + post.preco) : 'A consultar' }}</span>
                 </div>
             </div>
@@ -35,14 +61,41 @@
                     </svg>
                 </button>
 
-                <button class="agenda-button" (click)="agendar(post.tatuador_id)">
-                    Ver Agenda
+                <button class="agenda-button" (click)="agendar(post)">
+                    {{ post.tempo_estimado ? 'Agendar (' + post.tempo_estimado + ' min)' : 'Ver Agenda' }}
                 </button>
             </div>
         </div>
         
         <p *ngIf="posts.length === 0" class="no-posts-message">
-            Nenhuma tatuagem postada ainda. Volte em breve!
+            Nenhuma tatuagem encontrada.
         </p>
     </div>
+
+    <div class="profiles-grid" *ngIf="searchType === 'artists'">
+        <div class="tattoo-card artist-card" *ngFor="let artist of artists">
+            <div class="card-header artist-header" [routerLink]="['/artista', artist.id]" style="cursor: pointer;">
+                <img [src]="artist.profile_picture_url || 'default-profile.png'" alt="Avatar" class="profile-avatar big-avatar"> 
+                <div class="artist-info">
+                    <h3>{{ artist.username }}</h3>
+                    <span class="studio-name">{{ artist.studio_name }}</span>
+                </div>
+            </div>
+            
+            <div class="card-details">
+                <p class="post-description bio-text">{{ artist.bio || 'Sem biografia.' }}</p>
+            </div>
+
+            <div class="card-actions">
+                <button class="agenda-button full-width" [routerLink]="['/artista', artist.id]">
+                    Ver Perfil Completo
+                </button>
+            </div>
+        </div>
+
+        <p *ngIf="artists.length === 0" class="no-posts-message">
+            Nenhum tatuador encontrado.
+        </p>
+    </div>
+
 </div>

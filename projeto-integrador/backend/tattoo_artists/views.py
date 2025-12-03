@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, filters
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.views import APIView
@@ -12,7 +12,6 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
-# *** ALTERAÇÃO AQUI ***
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -20,17 +19,14 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # 1. Pega 'username' e 'password' validados
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
         
-        # 2. Autentica diretamente (é crucial passar o 'request' também)
         user = authenticate(request, username=username, password=password)
         
         if not user:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # 3. Gera os tokens JWT
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
@@ -48,3 +44,7 @@ class TattooArtistListView(generics.ListAPIView):
     queryset = TattooArtist.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+    
+    # Adicionado suporte a busca
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'studio_name', 'bio']

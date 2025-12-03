@@ -26,7 +26,8 @@ class TatuagemPostSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'tatuador', 'tatuador_id', 'tatuador_avatar_url', 
             'imagem', 'imagem_url', 'descricao', 'estilo', 'estilo_id', 
-            'tamanho', 'preco', 'data_criacao', 'curtido', 'total_curtidas'
+            'tamanho', 'preco', 'data_criacao', 'curtido', 'total_curtidas',
+            'tempo_estimado' # [CORREÇÃO]
         )
         read_only_fields = ('tatuador',)
 
@@ -98,10 +99,9 @@ class AgendaSerializer(serializers.ModelSerializer):
         allow_null=True
     )
 
-
     class Meta:
         model = Agenda
-        fields = ('id', 'time', 'status', 'nome_usuario', 'data_hora', 'client_id', 'tatuagem', 'tatuagem_id')
+        fields = ('id', 'time', 'status', 'nome_usuario', 'data_hora', 'client_id', 'tatuagem', 'tatuagem_id', 'duracao_minutos')
 
     def create(self, validated_data):
         data_hora = validated_data.pop('data_hora')
@@ -116,24 +116,18 @@ class AgendaSerializer(serializers.ModelSerializer):
             except Cliente.DoesNotExist:
                 pass 
 
-        if 'tatuagem' in validated_data:
-            validated_data['tatuagem'] = validated_data['tatuagem']
-        
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        # Atualiza data/hora se fornecido
         data_hora = validated_data.pop('data_hora', None)
         if data_hora:
             instance.data = data_hora.date()
             instance.hora_inicio = data_hora.time()
             
-        # [CORREÇÃO] Verifica explicitamente se 'client_id' está no dicionário
-        # Isso permite distinguir entre "não enviado" (manter atual) e "enviado como None" (remover)
         if 'client_id' in validated_data:
             client_id = validated_data.pop('client_id')
             if client_id is None:
-                instance.cliente = None # Remove o cliente (Recusar)
+                instance.cliente = None 
             else:
                 try:
                     instance.cliente = Cliente.objects.get(id=client_id)
@@ -142,6 +136,9 @@ class AgendaSerializer(serializers.ModelSerializer):
 
         if 'tatuagem' in validated_data:
             instance.tatuagem = validated_data['tatuagem']
+        
+        if 'duracao_minutos' in validated_data:
+            instance.duracao_minutos = validated_data['duracao_minutos']
 
         instance.status = validated_data.get('status', instance.status)
         instance.nome_usuario = validated_data.get('nome_usuario', instance.nome_usuario)

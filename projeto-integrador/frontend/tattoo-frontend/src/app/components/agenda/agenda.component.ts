@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Horario } from '../models/agenda.models';
@@ -11,10 +11,14 @@ import { AgendamentoService } from '../../services/agenda.service';
   templateUrl: './agenda.component.html',
   styleUrls: ['./agenda.component.scss']
 })
-export class AgendaComponent implements OnInit {
+export class AgendaComponent implements OnInit, OnChanges {
 
   @Input() artistId: number | null = null;
   @Input() isOwner: boolean = false; 
+  
+  // [NOVO] Inputs para quando o usuário vem do feed
+  @Input() preSelectedTattooId: number | null = null;
+  @Input() preSelectedDuration: number | null = null;
 
   currentDate = new Date();
   selectedDate!: Date;
@@ -37,6 +41,14 @@ export class AgendaComponent implements OnInit {
     const today = new Date();
     this.selectDay(today);
     this.initBookingForm();
+  }
+
+  // Recarrega se os inputs mudarem
+  ngOnChanges(changes: SimpleChanges): void {
+      if (changes['preSelectedTattooId'] && !changes['preSelectedTattooId'].firstChange) {
+          // Pode adicionar lógica extra aqui se necessário
+          console.log('Tatuagem pré-selecionada alterada:', this.preSelectedTattooId);
+      }
   }
 
   initBookingForm(): void {
@@ -103,9 +115,7 @@ export class AgendaComponent implements OnInit {
               this.horariosDisponiveis = slotsBase.map(slot => {
                   const found = agendamentosMap.get(slot.time);
                   if (found) {
-                      // [IMPORTANTE] Garante que o data_hora esteja presente para edições futuras
                       found.data_hora = slot.data_hora; 
-                      
                       if (found.status === 'indisponivel') {
                           found.status = 'ocupado'; 
                       }
@@ -165,9 +175,12 @@ export class AgendaComponent implements OnInit {
 
     const currentUserName = horario.nome_usuario || '';
     const currentStatus = horario.status === 'disponivel' ? 'reservado' : horario.status;
+    
+    // Pré-preenche nome se cliente estiver logado
+    const clientName = localStorage.getItem('client_name') || '';
 
     this.bookingForm.setValue({
-      userName: currentUserName,
+      userName: currentUserName || clientName,
       reservationType: currentStatus
     });
   }
@@ -186,10 +199,9 @@ export class AgendaComponent implements OnInit {
           time: this.selectedHorario.time
       };
 
-      // [CORREÇÃO] Passa opções para controlar o client_id
       const options = aceitar 
-          ? { skipClientAuth: true } // Aceitar: Mantém o cliente atual
-          : { clearClient: true };   // Recusar: Limpa o cliente
+          ? { skipClientAuth: true } 
+          : { clearClient: true };   
 
       this.agendamentoService.saveAgendamento(this.artistId, dataToSave, options).subscribe({
           next: () => {
@@ -219,10 +231,21 @@ export class AgendaComponent implements OnInit {
           time: this.selectedHorario.time
       };
 
+      // [NOVO] Se houver uma tatuagem pré-selecionada, anexa ao agendamento
+      if (this.preSelectedTattooId && this.preSelectedDuration) {
+          dataToSave.tatuagem_id = this.preSelectedTattooId;
+          dataToSave.duracao_minutos = this.preSelectedDuration;
+          console.log('Salvando agendamento vinculado à tatuagem:', this.preSelectedTattooId);
+      }
+
       this.agendamentoService.saveAgendamento(this.artistId, dataToSave).subscribe({
         next: () => {
             this.selectDay(this.selectedDate);
             this.closeBookingForm();
+            // Limpa a pré-seleção após agendar
+            this.preSelectedTattooId = null;
+            this.preSelectedDuration = null;
+            alert('Agendamento solicitado com sucesso!');
         },
         error: (error) => {
             console.error('Erro ao salvar agendamento:', error);

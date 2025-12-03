@@ -20,7 +20,6 @@ export class AgendamentoService {
     return this.http.get<Horario[]>(apiUrl, { params });
   }
 
-  // [CORREÇÃO] Adicionado parâmetro 'options' para controlar o envio do client_id
   saveAgendamento(
       artistId: number, 
       agendamento: Horario, 
@@ -28,16 +27,14 @@ export class AgendamentoService {
   ): Observable<Horario> {
     const apiUrl = this.getAgendaUrlForArtist(artistId);
     
-    // Lógica padrão: Pega do localStorage
     let clientIdToSend = null;
     const storedId = localStorage.getItem('client_id');
     
     if (options?.clearClient) {
-        clientIdToSend = null; // Força limpar o cliente (Recusar)
+        clientIdToSend = null; 
     } else if (options?.skipClientAuth) {
-        clientIdToSend = undefined; // Não envia o campo (Manter existente / Confirmar)
+        clientIdToSend = undefined; 
     } else {
-        // Comportamento padrão (Agendamento pelo Cliente)
         clientIdToSend = storedId ? parseInt(storedId, 10) : null;
     }
 
@@ -47,7 +44,14 @@ export class AgendamentoService {
       nome_usuario: agendamento.nome_usuario
     };
 
-    // Só adiciona ao payload se não for undefined
+    // [NOVO] Inclui dados da tatuagem e duração se existirem
+    if (agendamento.tatuagem_id) {
+        dataToSend.tatuagem_id = agendamento.tatuagem_id;
+    }
+    if (agendamento.duracao_minutos) {
+        dataToSend.duracao_minutos = agendamento.duracao_minutos;
+    }
+
     if (clientIdToSend !== undefined) {
         dataToSend.client_id = clientIdToSend;
     }

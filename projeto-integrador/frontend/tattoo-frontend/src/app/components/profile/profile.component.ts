@@ -1,18 +1,13 @@
-// frontend/tattoo-frontend/src/app/components/profile/profile.component.ts
-
-// 1. Importar ReactiveFormsModule e tipos de formulário
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-// [REMOVIDO] A importação do environment não é mais necessária aqui
 import { AgendaComponent } from "../agenda/agenda.component";
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  // 2. Adicionar ReactiveFormsModule
   imports: [CommonModule, AgendaComponent, ReactiveFormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
@@ -21,7 +16,7 @@ export class ProfileComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
   route = inject(ActivatedRoute);
-  fb = inject(FormBuilder); // 3. Injetar FormBuilder
+  fb = inject(FormBuilder);
 
   user: any = null;
   uploading: boolean = false;
@@ -32,47 +27,59 @@ export class ProfileComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput: ElementRef | undefined;
   
-  // 4. Variáveis para o formulário de postagem
   postForm: FormGroup;
   postFile: File | null = null;
   @ViewChild('postFileInput') postFileInput: ElementRef | undefined;
   postSubmissionError: string | null = null;
-  estilos: any[] = []; // Para o dropdown
+  estilos: any[] = []; 
+
+  preSelectedTattooId: number | null = null;
+  preSelectedDuration: number | null = null;
 
   constructor() {
-    // 5. Inicializar o formulário de postagem
     this.postForm = this.fb.group({
       descricao: [''],
       tamanho: [''],
       preco: [0, Validators.min(0)],
+      // [CORREÇÃO] Nome do campo: tempo_estimado
+      tempo_estimado: [60, [Validators.required, Validators.min(30)]], 
       estilo_id: [null],
-      imagem: [null, Validators.required] // Validador para o arquivo
+      imagem: [null, Validators.required] 
     });
   }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+       if (params['tattoo'] && params['duration']) {
+           this.preSelectedTattooId = parseInt(params['tattoo'], 10);
+           this.preSelectedDuration = parseInt(params['duration'], 10);
+           
+           setTimeout(() => {
+               const agendaEl = document.querySelector('app-agenda');
+               if (agendaEl) agendaEl.scrollIntoView({ behavior: 'smooth' });
+           }, 500);
+       }
+    });
+
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
       
       if (idParam) {
-        // É um perfil público (ex: /artista/5)
         this.isMyProfile = false;
         this.artistId = parseInt(idParam, 10);
         this.fetchPublicUserProfile(this.artistId);
       } else {
-        // É o perfil do tatuador logado (rota /perfil)
         this.isMyProfile = true;
         if (!this.authService.isLoggedIn()) {
           this.router.navigate(['/login']);
           return;
         }
         this.fetchMyUserProfile();
-        this.loadEstilos(); // 6. Carregar estilos se for o perfil do dono
+        this.loadEstilos(); 
       }
     });
   }
 
-  // 7. [NOVO] Carregar estilos da API
   loadEstilos(): void {
     this.authService.getEstilos().subscribe({
       next: (data) => {
@@ -88,10 +95,10 @@ export class ProfileComponent implements OnInit {
     this.authService.getMe().subscribe({
       next: (data: any) => {
         this.user = data;
-        this.artistId = data.id; // Salva o ID para passar para a agenda
+        this.artistId = data.id; 
       },
       error: (err: any) => {
-        console.error('Token inválido ou expirado. Forçando logout.', err);
+        console.error('Token inválido ou expirado.', err);
         this.authService.logout();
         this.router.navigate(['/login']);
       }
@@ -99,13 +106,12 @@ export class ProfileComponent implements OnInit {
   }
 
   fetchPublicUserProfile(id: number) {
-    // Reutiliza o endpoint que busca TODOS os perfis (idealmente, o backend teria um endpoint /profiles/<id>/)
     this.authService.getTattooArtistProfiles().subscribe({
       next: (profiles) => {
         this.user = profiles.find(p => p.id === id);
         if (!this.user) {
           console.error('Artista não encontrado');
-          this.router.navigate(['/home']); // Volta pro feed se o artista não existe
+          this.router.navigate(['/home']); 
         }
       },
       error: (err) => {
@@ -114,8 +120,6 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-
-  // [REMOVIDO] A função getProfileImageUrl(path) foi removida.
 
   triggerFileInputClick(): void {
     this.fileInput?.nativeElement.click();
@@ -138,14 +142,12 @@ export class ProfileComponent implements OnInit {
         error: (err: any) => {
           this.uploading = false;
           this.uploadMessage = 'Erro ao enviar a imagem. Tente novamente.';
-          console.error('Erro de upload:', err);
           setTimeout(() => this.uploadMessage = null, 3000);
         }
       });
     }
   }
   
-  // 8. [NOVO] Lógica para o formulário de NOVO POST
   triggerPostFileInputClick(): void {
     this.postFileInput?.nativeElement.click();
   }
@@ -154,7 +156,6 @@ export class ProfileComponent implements OnInit {
     const file: File = event.target.files[0];
     if (file) {
       this.postFile = file;
-      // Atualiza o valor do form para passar na validação
       this.postForm.patchValue({ imagem: file }); 
       this.postSubmissionError = null;
     }
@@ -178,14 +179,12 @@ export class ProfileComponent implements OnInit {
     this.authService.postTattooImage(postData, this.postFile).subscribe({
       next: (newPost) => {
         console.log('Post criado com sucesso!', newPost);
-        // Adiciona o novo post no início da lista na UI
         if (!this.user.posts) {
             this.user.posts = [];
         }
         this.user.posts.unshift(newPost);
         
-        // Limpa o formulário
-        this.postForm.reset({ preco: 0, estilo_id: null });
+        this.postForm.reset({ preco: 0, estilo_id: null, tempo_estimado: 60 });
         this.postFile = null;
         if (this.postFileInput) {
           this.postFileInput.nativeElement.value = '';
