@@ -57,7 +57,29 @@ class ClientProfileView(APIView):
 class TatuagemPostListCreateView(generics.ListCreateAPIView):
     queryset = TatuagemPost.objects.all().order_by('-data_criacao')
     serializer_class = TatuagemPostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = TatuagemPost.objects.all().order_by('-data_criacao')
+
+        preco_min = self.request.query_params.get('preco_min')
+        preco_max = self.request.query_params.get('preco_max')
+        estilo_id = self.request.query_params.get('estilo_id')
+
+
+
+        if preco_min:
+            queryset = queryset.filter(preco__gte=preco_min)
+
+        if preco_max:
+            queryset = queryset.filter(preco__lte=preco_max)
+
+        if estilo_id:
+            queryset = queryset.filter(estilo__id=estilo_id)   
+
+
+        return queryset
+
 
     def perform_create(self, serializer):
         serializer.save(tatuador=self.request.user)
